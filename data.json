@@ -1,0 +1,20 @@
+[
+	{
+		"Name": "Nate",
+		"Label": "Person",
+		"Age": 38
+	},
+	{
+		"Name": "Jon",
+		"Label": "Person",
+		"Age": 1000
+	},
+	{
+		"Name": "MIIS",
+		"Label": "Place",
+		"Address": {
+			"City": "Montery",
+			"State": "CA"
+		}
+	}
+]
