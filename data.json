@@ -7,7 +7,7 @@
 	{
 		"Name": "Jon",
 		"Label": "Person",
-		"Age": 1000
+		"Age": 40
 	},
 	{
 		"Name": "MIIS",
@@ -15,6 +15,8 @@
 		"Address": {
 			"City": "Montery",
 			"State": "CA"
-		}
+		},
+		"Lat": 36.59948,
+		"Long": -121.89673
 	}
 ]
