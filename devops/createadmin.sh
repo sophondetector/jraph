@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-echo "userpass.sh starting..."
+echo "script starting..."
 
 USERNAME=${USERNAME:-"msqladmin"}
 # PASSWORD=${PASSWORD:-"mydefaultpassword"}
@@ -13,4 +13,4 @@ groupmod --append -U "$USERNAME" wheel
 
 # echo "$PASSWORD" | passwd --stdin "$USERNAME"
 
-echo "userpass.sh finito"
+echo "script finito"
