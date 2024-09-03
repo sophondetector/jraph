@@ -1,9 +1,9 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-echo "script starting..."
+echo "$0 starting..."
 
-USERNAME=${USERNAME:-"msqladmin"}
-# PASSWORD=${PASSWORD:-"mydefaultpassword"}
+USERNAME="jraph-admin"
+PASSWORD='Intrototerror1!'
 
 echo "creating user $USERNAME"
 useradd "$USERNAME"
@@ -11,6 +11,6 @@ useradd "$USERNAME"
 echo "adding user $USERNAME to wheel group"
 groupmod --append -U "$USERNAME" wheel
 
-# echo "$PASSWORD" | passwd --stdin "$USERNAME"
+echo "$PASSWORD" | passwd --stdin "$USERNAME"
 
-echo "script finito"
+echo "$0 finito"
