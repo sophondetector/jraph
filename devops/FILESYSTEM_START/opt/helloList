@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+
+sayHello () {
+	for arg in "$@"
+	do
+		echo "hello $arg"
+	done
+}
+
+sayHello $@
+

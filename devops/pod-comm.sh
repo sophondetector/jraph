@@ -1,0 +1,4 @@
+MSSQL_CONTAINER_ID="2272069e046d"
+
+podman exec -it $MSSQL_CONTAINER_ID /bin/bash
+
