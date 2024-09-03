@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import time
+
+print("hello from jraph service!")
+print(f"the time is {time.now()}")
