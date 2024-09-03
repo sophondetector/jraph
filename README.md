@@ -46,3 +46,5 @@ The stage after *that* will be securing the remote droplet.
 * `devops/*.sh` contains provisioning scripts for the `jraph` service container.
 * `devops/FILESYSTEM_START/*` contains some system files for the `jraph` service container.
 
+## 0x68 Error
+Checking what does mean 0x68 is 104 in decimal, and that is a Connection Reset by Peer error (i.e. the server abruptly closed the connection) and in Linux errors are listed here: https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h.
