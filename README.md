@@ -8,7 +8,7 @@ The `jraph` data model is a *directed* graph data model.
 `jraph` intends to make it easy for a group of analysts working from a `jraph` dataset to create `kml` files for viewing in `Google Earth`, in a manner that accomidates "improvised nosql property additions". 
 `jraph` is a data model implemented for `Transact SQL` for use with `Microsoft SQL Server`.
 `jraph` is meant to make extensive use of `Transact SQL`'s `nosql`-esque properties.
-That is, the formal `jraph` schema will stay very small, containing Lat/Long, integer id, name, and a labeled array o
+That is, the formal `jraph` schema will stay very small, containing Lat/Long, integer id, name, and an array of connection ids.
 
 
 ## Basic Use
