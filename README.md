@@ -53,7 +53,7 @@ Create a local development container using `podman`.
 This container can then be deployed as a local or cloud service.
 
 ```sh
-mv creds.sh.SAMPLE creds.sh # and then enter your desired values
+cp creds.sh.SAMPLE creds.sh # and then enter your desired values
 ./dev-tools.sh create_jraph_image
 ./dev-tools.sh test_jraph_image
 ```
