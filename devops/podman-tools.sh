@@ -25,25 +25,48 @@ podclear () {
 		|| echo "podclear aborted"
 }
 
-# create jraph-service container
-podnew () {
-	# TODO remove publish-all
+create_jraph_image () {
+	BASE_IMAGE="fedora:latest"
+	IMAGE_NAME="jraph"
+	IMAGE_TAG="latest"
+	WORKDIR="/root"
+	COMMAND="/bin/bash"
+	MEMORY="2g"
+
+	# TODO get systemd to be the init instead of a bash process
 	podman create \
-		--memory=2g \
-		--name="jraph-base" \
-		--workdir=/root \
+		--memory=$MEMORY \
+		--name="$IMAGE_NAME" \
+		--workdir="$WORKDIR" \
 		--interactive \
 		--tty \
 		--publish-all \
 		--replace \
-		fedora:latest 
+		$BASE_IMAGE 
+		$COMMAND
 
-	podman cp devops/install-basic-deps.sh jraph-base:/root/
+	podman cp devops/install-basic-deps.sh $IMAGE_NAME:/root/
+	podman cp devops/create-admin.sh $IMAGE_NAME:/root/
+	podman cp devops/install-msql-server.sh $IMAGE_NAME:/root/
 
-	podman start jraph-base
+	podman start $IMAGE_NAME
 	
-	podman exec -it jraph-base . /root/install-basic-deps.sh
+	# TODO package these three scripts into one command
+	# and then set that command as the starting command 
+	# in the podman create command above
+	# then just need to do podman run and then podman commit
+	podman exec -t $IMAGE_NAME /bin/bash -x /root/install-basic-deps.sh
+	podman exec -it $IMAGE_NAME /bin/bash -x /root/create-admin.sh
+	podman exec -it $IMAGE_NAME /bin/bash -x /root/install-msql-server.sh
+
+	podman commit $IMAGE_NAME $IMAGE_NAME:$IMAGE_TAG
 }
+
+test_jraph_image () {
+	# TODO get systemd to be the init instead of a bash process
+	podman run -it --rm jraph:latest /bin/bash
+}
+
 
 # jraph client command 
 jraph () {
@@ -52,3 +75,5 @@ jraph () {
 	echo "jraph not implemented"	
 	# ssh $JRAPH_HOST $SERVER_COMMAND
 }
+
+"$@"
