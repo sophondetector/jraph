@@ -54,9 +54,8 @@ This container can then be deployed as a local or cloud service.
 
 ```sh
 mv creds.sh.SAMPLE creds.sh # and then enter your desired values
-./dev-tools.sh build
-./dev-tools.sh start
-./dev-tools.sh test
+./dev-tools.sh create_jraph_image
+./dev-tools.sh test_jraph_image
 ```
 
 ## 0x68 Error
