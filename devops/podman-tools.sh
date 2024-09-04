@@ -20,24 +20,21 @@ podlist () {
 
 # clear containers
 podclear () {
-	confirm "clear all podman containers?" \
+	confirm "clear following containers and associated volumes $@" \
 		&& podman container rm --volumes "$@" \
-		|| echo "didn't do anything"
+		|| echo "podclear aborted"
 }
 
 # create jraph-service container
-# TODO add options
-podmake () {
-	podman run -it fedora:latest /bin/bash
+podnew () {
+	# TODO remove publish-all
+	podman run --memory=2g --name="jraph-base" --workdir=/root --volume=./devops/:/root/devops/:z,ro --rmi --publish-all --tty --interactive --rm fedora:latest /bin/bash
 }
 
-# ssh into container
-podssh () {
-	podman exec -it $1 /bin/bash
+# jraph client command 
+jraph () {
+	JRAPH_HOST=$1
+	SERVER_COMMAND="$@"
+	echo "jraph not implemented"	
+	# ssh $JRAPH_HOST $SERVER_COMMAND
 }
-
-# jraph service status
-podcheck () {
-	podman container inspect $1
-}
-
