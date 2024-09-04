@@ -28,7 +28,21 @@ podclear () {
 # create jraph-service container
 podnew () {
 	# TODO remove publish-all
-	podman run --memory=2g --name="jraph-base" --workdir=/root --volume=./devops/:/root/devops/:z,ro --rmi --publish-all --tty --interactive --rm fedora:latest /bin/bash
+	podman create \
+		--memory=2g \
+		--name="jraph-base" \
+		--workdir=/root \
+		--interactive \
+		--tty \
+		--publish-all \
+		--replace \
+		fedora:latest 
+
+	podman cp devops/install-basic-deps.sh jraph-base:/root/
+
+	podman start jraph-base
+	
+	podman exec -it jraph-base . /root/install-basic-deps.sh
 }
 
 # jraph client command 
