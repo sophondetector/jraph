@@ -40,11 +40,24 @@ The next stage will only commnece **after** the MVP has been completed for `.sh`
 The stage after that will be allowing users to submit sql commands either through `sqlcmd` or the `jraph` tool.
 The stage after *that* will be securing the remote droplet.
 
+
 ## File Structure
 * `lib/` contains Jon's `sql` and some `sql` scraps which will form the raw material for the first mvp schema.
 * `lib/modelSql` contains some model `sql` I got from somewhere.
 * `devops/*.sh` contains provisioning scripts for the `jraph` service container.
 * `devops/FILESYSTEM_START/*` contains some system files for the `jraph` service container.
+
+
+## Dev Set Up
+Create a local development container using `podman`. 
+This container can then be deployed as a local or cloud service.
+
+```sh
+mv creds.sh.SAMPLE creds.sh # and then enter your desired values
+./dev-tools.sh build
+./dev-tools.sh start
+./dev-tools.sh test
+```
 
 ## 0x68 Error
 Checking what does mean 0x68 is 104 in decimal, and that is a Connection Reset by Peer error (i.e. the server abruptly closed the connection) and in Linux errors are listed here: https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h.
