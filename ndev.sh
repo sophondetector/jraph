@@ -45,7 +45,6 @@ ssh () {
 	podman exec -ai $SERVICE_CONTAINER_NAME /bin/bash
 }
 
-# jraph client command
 jraph_client () {
 	echo "this command not implemented"	
 }
