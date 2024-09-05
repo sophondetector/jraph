@@ -2,8 +2,10 @@
 
 echo "$0 starting..."
 
-USERNAME="jraph-admin"
-PASSWORD='Intrototerror1!'
+if ([[ ! -v USERNAME ]] || [[ ! -v PASSWORD ]]); then 
+	echo "$0 requires \$USERNAME and \$PASSWORD in env"
+	exit 1
+fi
 
 echo "creating user $USERNAME"
 useradd "$USERNAME"
@@ -14,3 +16,4 @@ groupmod --append -U "$USERNAME" wheel
 echo "$PASSWORD" | passwd --stdin "$USERNAME"
 
 echo "$0 finito"
+

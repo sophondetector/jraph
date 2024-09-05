@@ -51,9 +51,16 @@ The stage after *that* will be securing the remote droplet.
 ## Dev Set Up
 Create a local development container using `podman`. 
 This container can then be deployed as a local or cloud service.
+Most aspects of the containerd api are eschewed in favor of bash script. 
+
+
+### Configuration
+`devops/config.sh` is the main configuration file.
+`devops/config.EXAMPLE.sh` is a version of the configuration file for `.git`, with secret values unfilled.
 
 ```sh
-cp creds.sh.SAMPLE creds.sh # and then enter your desired values
+cp devops/config.EXAMPLE.sh devops/config.sh # and then enter your desired values
+
 ./dev-tools.sh create_jraph_image
 ./dev-tools.sh test_jraph_image
 ```
