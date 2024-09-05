@@ -40,7 +40,7 @@ create_jraph_image () {
 		"fedora:latest" \
 		$COMMAND
 
-	podman cp devops/FILESYSTEM_ROOT/. $CONTAINER_NAME:/
+	podman cp JROOT/. $CONTAINER_NAME:/
 	
 	podman start --attach --interactive $CONTAINER_NAME
 	
