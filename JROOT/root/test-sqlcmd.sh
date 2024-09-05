@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-echo "testing sql service"
-
 sqlcmd \
 	-C \
 	-U sa \

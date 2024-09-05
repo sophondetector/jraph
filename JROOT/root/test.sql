@@ -1,3 +1,9 @@
+CREATE DATABASE jongraph;
+GO
+
+USE jongraph;
+GO
+
 CREATE TABLE dbo.Products(
 	ProductID int PRIMARY KEY NOT NULL,
 	ProductName varchar(25) NOT NULL,
@@ -13,3 +19,10 @@ VALUES
 	(3, 'Golden Kissenger', 1000.48, 'A golden doll with the face of Henry Kissenger'),
 	(4, 'Chainsaw', 50.00, 'A chainsaw for cutting down trees'),
 	(5, 'Used Braces', 101.00, 'Braces for a small child, lightly used');
+
+GO
+
+SELECT * from dbo.Products;
+
+GO
+

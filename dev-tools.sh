@@ -26,8 +26,7 @@ create_jraph_image () {
 	WORKDIR="/root"
 	COMMAND="/bin/bash -x entrypoint.sh"
 
-	# TODO get systemd to be the init instead of a bash process
-	# TODO remove publish-all
+	# TODO SECURITY remove publish-all
 	podman create \
 		--memory="2g" \
 		--name="$CONTAINER_NAME" \
@@ -36,7 +35,6 @@ create_jraph_image () {
 		--tty \
 		--publish-all \
 		--replace \
-		--init \
 		"fedora:latest" \
 		$COMMAND
 
@@ -44,16 +42,14 @@ create_jraph_image () {
 	
 	podman start --attach --interactive $CONTAINER_NAME
 	
-	# podman commit $CONTAINER_NAME $IMAGE_NAME:latest
+	podman commit $CONTAINER_NAME $IMAGE_NAME:latest
 }
 
-test_jraph_image () {
-	# TODO get systemd to be the init instead of a bash process
-	podman run -it --rm jraph:latest /bin/bash
+start_jraph_image () {
+	podman run --rm -it jraph:latest /opt/mssql/bin/sqlservr
 }
 
-
-# jraph client command 
+# jraph client command
 jraph_service_request () {
 	echo "this command not implemented"	
 	# JRAPH_HOST=$1

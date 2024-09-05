@@ -15,7 +15,6 @@ dnf update --all
 # TODO configgify the interactive answers
 echo "configuring mssql-server service"
 /opt/mssql/bin/mssql-conf setup
-systemctl status mssql-server # TODO make this work by figuring out systemd podman issue
 
 echo "making sqlcmd avail in PATH"
 echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc

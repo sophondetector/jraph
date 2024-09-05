@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-DEPS='locate jq vim'
+DEPS='locate jq vim ncurses'
 
 echo "installing ${DEPS}"
 dnf check-update
