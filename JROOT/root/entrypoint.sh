@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-SERVICE_NAME='jraph'
 DEPS="mssql-server mssql-tools18 unixODBC-devel"
 
-echo "installing the following deps for $SERVICE_NAME"
-echo "$DEPS"
+echo "installing following SQL Server deps: $DEPS"
 
 curl -o /etc/yum.repos.d/mssql-server.repo https://packages.microsoft.com/config/rhel/9/mssql-server-2022.repo
 curl -o /etc/yum.repos.d/mssql-release.repo https://packages.microsoft.com/config/rhel/9/prod.repo
