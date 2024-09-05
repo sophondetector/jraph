@@ -7,6 +7,7 @@ build () {
 
 	# TODO configgify msql setup options
 	# TODO SECURITY remove publish-all
+	echo "creating"
 	podman create \
 		--env-file="config.env" \
 		--memory="2g" \
@@ -17,12 +18,15 @@ build () {
 		--publish-all \
 		--replace \
 		"fedora:latest" \
-		"/bin/bash -x entrypoint.sh"
+		"./entrypoint.sh"
 
+	echo "copying"
 	podman cp JROOT/. $CONTAINER_NAME:/
 	
+	echo "starting"
 	podman start --attach --interactive $CONTAINER_NAME
 	
+	echo "committing"
 	podman commit $CONTAINER_NAME $IMAGE_NAME:latest
 }
 
