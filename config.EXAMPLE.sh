@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-export JRAPH_ADMIN_USERNAME=
-export JRAPH_ADMIN_PASSWORD=
-export JRAPH_ROOT_PASSWORD=
-export JRAPH_SA_PASSWORD=
-
