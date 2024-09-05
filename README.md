@@ -1,5 +1,5 @@
 # jraph Service
-A containerized service that implements the `jraph` data model and the ability to create `.kml` files from said `jraph` data model.
+A containerized service that implements the `jraph` data model and provides the ability to create `.kml` files from said `jraph` data model.
 ```sh
 $ jraph_client /path/to/input-ids.txt
 $ cat output.kml
