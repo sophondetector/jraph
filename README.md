@@ -44,14 +44,16 @@ The stage after *that* will be securing the remote droplet.
 ## File Structure
 * `lib/` contains Jon's `sql` and some `sql` scraps which will form the raw material for the first mvp schema.
 * `lib/modelSql` contains some model `sql` I got from somewhere.
-* `devops/*.sh` contains provisioning scripts for the `jraph` service container.
-* `devops/FILESYSTEM_START/*` contains some system files for the `jraph` service container.
+* `devops/FILESYSTEM_ROOT/*` contains all the container system and build files; the directory is essentially part of the `jraph` image schema.
+* `devops/FILESYSTEM_ROOT/root/` contains all provisioning scripts `prov-*.sh`, which are all packaged together into `/root/entrypoint.sh`.
 
 
 ## Dev Set Up
 Create a local development container using `podman`. 
 This container can then be deployed as a local or cloud service.
 Most aspects of the containerd api are eschewed in favor of bash script. 
+Any files the container needs are in `devops/FILESYSTEM_ROOT/*`.
+`FILESYSTEM_ROOT` is copied over *en toto* during the `podman` build process.
 
 
 ### Configuration

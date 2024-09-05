@@ -18,40 +18,33 @@ confirm () {
 }
 
 create_jraph_image () {
-	BASE_IMAGE="fedora:latest"
+	# TODO use an env file instead
+	source config.sh 
+
+	CONTAINER_NAME="jraph_container"
 	IMAGE_NAME="jraph"
-	IMAGE_TAG="latest"
 	WORKDIR="/root"
-	COMMAND="/bin/bash"
-	MEMORY="2g"
+	COMMAND="/bin/bash -x entrypoint.sh"
 
 	# TODO get systemd to be the init instead of a bash process
+	# TODO remove publish-all
 	podman create \
-		--memory=$MEMORY \
-		--name="$IMAGE_NAME" \
+		--memory="2g" \
+		--name="$CONTAINER_NAME" \
 		--workdir="$WORKDIR" \
 		--interactive \
 		--tty \
 		--publish-all \
 		--replace \
-		$BASE_IMAGE 
+		--init \
+		"fedora:latest" \
 		$COMMAND
 
-	podman cp devops/install-basic-deps.sh $IMAGE_NAME:/root/
-	podman cp devops/create-admin.sh $IMAGE_NAME:/root/
-	podman cp devops/install-msql-server.sh $IMAGE_NAME:/root/
-
-	podman start $IMAGE_NAME
+	podman cp devops/FILESYSTEM_ROOT/. $CONTAINER_NAME:/
 	
-	# TODO package these three scripts into one command
-	# and then set that command as the starting command 
-	# in the podman create command above
-	# then just need to do podman run and then podman commit
-	podman exec -t $IMAGE_NAME /bin/bash -x /root/install-basic-deps.sh
-	podman exec -it $IMAGE_NAME /bin/bash -x /root/create-admin.sh
-	podman exec -it $IMAGE_NAME /bin/bash -x /root/install-msql-server.sh
-
-	podman commit $IMAGE_NAME $IMAGE_NAME:$IMAGE_TAG
+	podman start --attach --interactive $CONTAINER_NAME
+	
+	# podman commit $CONTAINER_NAME $IMAGE_NAME:latest
 }
 
 test_jraph_image () {
