@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ "$@" =~ "*help" ]]; then
+	echo "hello! help"
+fi
+
 confirm () {
     # call with a prompt string or use a default
     read -r -p "${1:-Are you sure? [y/N]} " response
@@ -11,18 +15,6 @@ confirm () {
             false
         ;;
     esac
-}
-
-# list containers
-podlist () {
-	podman container list --all "$@"
-}
-
-# clear containers
-podclear () {
-	confirm "clear following containers and associated volumes $@" \
-		&& podman container rm --volumes "$@" \
-		|| echo "podclear aborted"
 }
 
 create_jraph_image () {
@@ -69,10 +61,10 @@ test_jraph_image () {
 
 
 # jraph client command 
-jraph () {
-	JRAPH_HOST=$1
-	SERVER_COMMAND="$@"
-	echo "jraph not implemented"	
+jraph_service_request () {
+	echo "this command not implemented"	
+	# JRAPH_HOST=$1
+	# SERVER_COMMAND="$@"
 	# ssh $JRAPH_HOST $SERVER_COMMAND
 }
 
