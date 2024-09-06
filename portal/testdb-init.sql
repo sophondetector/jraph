@@ -1,7 +1,7 @@
-CREATE DATABASE jongraph;
+CREATE DATABASE testdb;
 GO
 
-USE jongraph;
+USE testdb;
 GO
 
 CREATE TABLE dbo.Products(

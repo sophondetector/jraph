@@ -3,6 +3,7 @@
 STAGE_ONE="jraph_build"
 STAGE_TWO="jraph"
 IMAGE_NAME="$STAGE_TWO:latest"
+TEST_DATABASE="testdb"
 
 # TODO create help function which lists functions and their docstrings
 # Has ability to limit to one docstring e.g.
@@ -23,7 +24,7 @@ build () {
 		--tty \
 		--publish-all \
 		--replace \
-		--volume="./portal/:/root/portal:O" \
+		--volume="./portal/:/root/portal:z" \
 		"fedora:latest" \
 		"portal/install-sqlserver.sh"
 
@@ -44,15 +45,29 @@ build () {
 		--interactive \
 		--tty \
 		--publish-all \
-		--volume="./portal/:/root/portal:O" \
+		--volume="./portal/:/root/portal:z" \
 		--name="$STAGE_TWO" \
 		--replace \
 		"$IMAGE_NAME"
 }
 
 start () {
-	podman start --attach --interactive \
-		$STAGE_TWO
+	podman start "$@" $STAGE_TWO
+}
+
+test.init () {
+	podman exec --interactive --tty \
+		$STAGE_TWO \
+		/opt/mssql-tools18/bin/sqlcmd \
+			-C -U sa -P $JRAPH_SA_PASSWORD \
+			-i portal/testdb-init.sql -o portal/testdb-init-output.out
+}
+
+test () {
+	podman exec --interactive --tty \
+		$STAGE_TWO \
+		/opt/mssql-tools18/bin/sqlcmd \
+			-C -U sa -P $JRAPH_SA_PASSWORD -d $TEST_DATABASE -Q "select * from dbo.Products"
 }
 
 shell () {
@@ -60,21 +75,13 @@ shell () {
 		$STAGE_TWO /bin/bash
 }
 
-test () {
-	podman exec --interactive --tty \
-		$STAGE_TWO \
-		/opt/mssql-tools18/bin/sqlcmd \
-			-C -U sa -P $JRAPH_SA_PASSWORD -d jongraph -Q "select * from dbo.Products"
-}
-
-# TODO figure out what mount command makes the container filesystem live-update
-sync () {
-	podman cp portal/. $STAGE_TWO:/root/portal/
-}
-
 jraph_client () {
 	podman exec --interactive --tty $STAGE_TWO \
 		/usr/bin/python portal/return_kml.py "$@"
+}
+
+clean () {
+	echo "not implemented" # TODO implement ./ndev clean
 }
 
 

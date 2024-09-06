@@ -17,7 +17,3 @@ echo "configuring mssql-server service"
 echo "making sqlcmd avail in PATH"
 echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
 source ~/.bashrc
-
-echo "creating jongraph database and test table dbo.Products"
-/opt/mssql-tools18/bin/sqlcmd \
-	-C -U sa -P $JRAPH_SA_PASSWORD -i test-db-init.sh -o test-init-output.log

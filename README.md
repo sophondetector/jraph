@@ -10,16 +10,17 @@ $ cat output.kml
 * `portal/` is a shared dir between the host repo and the local dev container `/root/portal`.
 * `config.env` is the main configuration file.
 * `config.env.EXAMPLE` is a version of the configuration file for `.git`, with secret values unfilled.
+* Files with the `.out` extension will be ignored by git
 
 ### Building and Running Jraph Service Locally
 ```sh
 cp config.env.EXAMPLE config.env
 # enter values into config.env
 
-./ndev build
-./ndev start 
-./ndev shell # in a separate window
-./ndev sync # syncs the container and host portal dirs (TODO FIXME!!!!)
+./ndev build # build the service
+./ndev start # start the service
+./ndev test # run a test command
+./ndev shell # open a shell in the service container
 ./ndev jraph_client 3 # retrieve record id "3" from the jraph test database
 ```
 

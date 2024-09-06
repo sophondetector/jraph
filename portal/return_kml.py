@@ -13,7 +13,7 @@ def get_pass():
 
 
 def run_sql(sql, password):
-    comm = """/opt/mssql-tools18/bin/sqlcmd -C -U sa -P {} -d jongraph -Q""" .format(
+    comm = """/opt/mssql-tools18/bin/sqlcmd -C -U sa -P {} -d testdb -Q""" .format(
         password).split()
     comm.append(sql)
     res = subprocess.run(comm, capture_output=True)
@@ -22,14 +22,14 @@ def run_sql(sql, password):
 
 def main():
     pw = get_pass()
-    print('PASSWORD', pw)
 
-    for idx, arg in enumerate(sys.argv):
-        print('ARG', idx, arg)
+    # print('PASSWORD', pw)
+    # for idx, arg in enumerate(sys.argv):
+    #     print('ARG', idx, arg)
 
     sql = "select * from dbo.Products where ProductId={}".format(sys.argv[1])
     res = run_sql(sql, pw)
-    print('RESULT: ', res)
+    print('RESULT: ', res.stdout.decode())
 
 
 main()

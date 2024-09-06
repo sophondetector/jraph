@@ -1,1 +1,1 @@
-SELECT name FROM jongraph.sys.tables;
+SELECT name FROM testdb.sys.tables;
