@@ -19,7 +19,7 @@ build () {
 		--publish-all \
 		--replace \
 		"fedora:latest" \
-		"./entrypoint.sh"
+		"./install-sqlserver.sh"
 
 	echo "copying"
 	podman cp JROOT/. $STAGE_ONE:/
