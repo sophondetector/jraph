@@ -27,8 +27,7 @@ The `output.kml` will show the entity locations on the globe, the connections be
 Create a local development container using `podman`. 
 This container can then be deployed as a local or cloud service.
 Most aspects of the containerd api are eschewed in favor of bash script. 
-Any files the container needs are in `JROOT/*`.
-`JROOT` is copied over *en toto* during the `podman` build process.
+`JROOT/root/` is mounted to `/root/` when the jraph container is run.
 
 
 ### Configuration

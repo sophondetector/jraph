@@ -18,12 +18,10 @@ build () {
 		--tty \
 		--publish-all \
 		--replace \
+		--volume JROOT/root:/root:z \
 		"fedora:latest" \
 		"./install-sqlserver.sh"
 
-	echo "copying"
-	podman cp JROOT/. $STAGE_ONE:/
-	
 	echo "starting"
 	podman start --attach --interactive $STAGE_ONE
 	
