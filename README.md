@@ -23,6 +23,7 @@ cp config.env.EXAMPLE config.env
 
 ## jraph Model
 The name `jraph` is a hip, edgy, fun combination of "Jon" and "graph".
+`jraph` intends to be (1) integrable with `Google Earth` and `Analyst Notebook`; and (2) intuitive to extend.
 The `jraph` data model is a *directed* graph data model. 
 `jraph` intends to make it easy for a group of analysts working from a `jraph` dataset to create `kml` files for viewing in `Google Earth`, in a manner that accomidates "improvised nosql property additions". 
 `jraph` is a data model implemented for `Transact SQL` for use with `Microsoft SQL Server`.
