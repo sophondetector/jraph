@@ -68,7 +68,8 @@ sync_portal () {
 }
 
 jraph_client () {
-	echo "this command not implemented"	
 }
 
+
+# TODO change this to "$1 $<everything after arg 1>"
 "$@"
