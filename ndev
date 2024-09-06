@@ -68,6 +68,8 @@ sync_portal () {
 }
 
 jraph_client () {
+	podman exec --interactive --tty $STAGE_TWO \
+		/usr/bin/python portal/return_kml.py
 }
 
 
