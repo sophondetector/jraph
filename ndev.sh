@@ -5,10 +5,10 @@ STAGE_TWO="jraph"
 IMAGE_NAME="$STAGE_TWO:latest"
 
 build () {
-
+	# TODO REDO using CONTAINERFILE
 	# TODO configgify msql setup options
 	# TODO SECURITY remove publish-all
-	echo "creating"
+	echo "creating $STAGE_ONE"
 	podman create \
 		--env-file="config.env" \
 		--memory="2g" \
@@ -18,14 +18,16 @@ build () {
 		--tty \
 		--publish-all \
 		--replace \
-		--volume JROOT/root:/root:z \
+		--volume="./portal/:/root/portal:O" \
 		"fedora:latest" \
-		"./install-sqlserver.sh"
+		"portal/install-sqlserver.sh"
 
-	echo "starting"
+	echo "starting $STAGE_ONE"
 	podman start --attach --interactive $STAGE_ONE
+	# TODO make it so sqlserver doesn't try to start at the end of 
+	# the msql configuration process
 	
-	echo "committing"
+	echo "committing $STAGE_ONE to $IMAGE_NAME"
 	podman commit \
 		--change CMD=/opt/mssql/bin/sqlservr \
 		$STAGE_ONE \
@@ -37,8 +39,10 @@ build () {
 		--interactive \
 		--tty \
 		--publish-all \
-		--name $STAGE_TWO \
-		--replace $IMAGE_NAME
+		--volume="./portal/:/root/portal:O" \
+		--name="$STAGE_TWO" \
+		--replace \
+		"$IMAGE_NAME"
 }
 
 start () {
@@ -55,7 +59,7 @@ test () {
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
-			-C -U sa -P $JRAPH_SA_PASSWORD -i /root/test.sql
+			-C -U sa -P $JRAPH_SA_PASSWORD -i /root/portal/test.sql
 }
 
 jraph_client () {
