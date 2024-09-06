@@ -22,6 +22,7 @@ def run_sql(sql, password):
 
 def main():
     pw = get_pass()
+    print('PASSWORD', pw)
     for idx, arg in enumerate(sys.argv):
         print('ARG', idx, arg)
 
