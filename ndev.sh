@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-CONTAINER_NAME="jraph_build_container"
-IMAGE_NAME="jraph:latest"
-SERVICE_CONTAINER_NAME="jraph_service_container"
+STAGE_ONE="jraph_build"
+STAGE_TWO="jraph"
+IMAGE_NAME="$STAGE_TWO:latest"
 
 build () {
 
@@ -12,7 +12,7 @@ build () {
 	podman create \
 		--env-file="config.env" \
 		--memory="2g" \
-		--name="$CONTAINER_NAME" \
+		--name="$STAGE_ONE" \
 		--workdir="/root" \
 		--interactive \
 		--tty \
@@ -22,40 +22,42 @@ build () {
 		"./entrypoint.sh"
 
 	echo "copying"
-	podman cp JROOT/. $CONTAINER_NAME:/
+	podman cp JROOT/. $STAGE_ONE:/
 	
 	echo "starting"
-	podman start --attach --interactive $CONTAINER_NAME
+	podman start --attach --interactive $STAGE_ONE
 	
 	echo "committing"
 	podman commit \
 		--change CMD=/opt/mssql/bin/sqlservr \
-		$CONTAINER_NAME \
+		$STAGE_ONE \
 		$IMAGE_NAME
 	
-	echo "creating local jraph container $SERVICE_CONTAINER_NAME"
+	echo "creating local jraph container $STAGE_TWO"
 	podman create \
 		--env-file="config.env" \
 		--interactive \
 		--tty \
 		--publish-all \
-		--name $SERVICE_CONTAINER_NAME \
+		--name $STAGE_TWO \
 		--replace $IMAGE_NAME
 }
 
 start () {
 	podman start --attach --interactive \
-		$SERVICE_CONTAINER_NAME
+		$STAGE_TWO
 }
 
 shell () {
 	podman exec --interactive --tty \
-		$SERVICE_CONTAINER_NAME /bin/bash
+		$STAGE_TWO /bin/bash
 }
 
-run-test () {
+test () {
 	podman exec --interactive --tty \
-		$SERVICE_CONTAINER_NAME /bin/bash +x test-sqlcmd.sh
+		$STAGE_TWO \
+		/opt/mssql-tools18/bin/sqlcmd \
+			-C -U sa -P $JRAPH_SA_PASSWORD -i /root/test.sql
 }
 
 jraph_client () {
