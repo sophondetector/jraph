@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 CONTAINER_NAME="jraph_build_container"
-IMAGE_NAME="jraph"
+IMAGE_NAME="jraph:latest"
 SERVICE_CONTAINER_NAME="jraph_service_container"
 
 build () {
@@ -31,18 +31,25 @@ build () {
 	podman commit \
 		--change CMD=/opt/mssql/bin/sqlservr \
 		$CONTAINER_NAME \
-		$IMAGE_NAME:latest
+		$IMAGE_NAME
 	
 	echo "creating local jraph container $SERVICE_CONTAINER_NAME"
-	podman create -it -P --name $SERVICE_CONTAINER_NAME --replace $IMAGE_NAME:latest 
+	podman create \
+		--interactive \
+		--tty \
+		--publish-all \
+		--name $SERVICE_CONTAINER_NAME \
+		--replace $IMAGE_NAME
 }
 
 start () {
-	podman start --attach --interactive $SERVICE_CONTAINER_NAME
+	podman start --attach --interactive \
+		$SERVICE_CONTAINER_NAME
 }
 
 ssh () {
-	podman exec -ai $SERVICE_CONTAINER_NAME /bin/bash
+	podman exec --interactive --tty \
+		$SERVICE_CONTAINER_NAME /bin/bash
 }
 
 jraph_client () {

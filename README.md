@@ -40,7 +40,8 @@ cp config.EXAMPLE.env config.env
 # enter values into config.env
 
 ./ndev.sh build
-./ndev.sh start
+./ndev.sh start &
+./ndev.sh ssh
 ```
 
 ## 0x68 Error
