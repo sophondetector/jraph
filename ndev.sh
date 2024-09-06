@@ -35,6 +35,7 @@ build () {
 	
 	echo "creating local jraph container $SERVICE_CONTAINER_NAME"
 	podman create \
+		--env-file="config.env" \
 		--interactive \
 		--tty \
 		--publish-all \
@@ -47,9 +48,14 @@ start () {
 		$SERVICE_CONTAINER_NAME
 }
 
-ssh () {
+shell () {
 	podman exec --interactive --tty \
 		$SERVICE_CONTAINER_NAME /bin/bash
+}
+
+run-test () {
+	podman exec --interactive --tty \
+		$SERVICE_CONTAINER_NAME /bin/bash +x test-sqlcmd.sh
 }
 
 jraph_client () {
