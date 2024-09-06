@@ -23,10 +23,11 @@ def run_sql(sql, password):
 def main():
     pw = get_pass()
     print('PASSWORD', pw)
+
     for idx, arg in enumerate(sys.argv):
         print('ARG', idx, arg)
 
-    sql = "select * from dbo.Products"
+    sql = "select * from dbo.Products where ProductId={}".format(sys.argv[1])
     res = run_sql(sql, pw)
     print('RESULT: ', res)
 

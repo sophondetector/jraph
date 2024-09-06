@@ -68,15 +68,14 @@ test () {
 }
 
 # TODO figure out what mount command makes the container filesystem live-update
-sync_portal () {
+sync () {
 	podman cp portal/. $STAGE_TWO:/root/portal/
 }
 
 jraph_client () {
 	podman exec --interactive --tty $STAGE_TWO \
-		/usr/bin/python portal/return_kml.py
+		/usr/bin/python portal/return_kml.py "$@"
 }
 
 
-# TODO change this to "$1 $<everything after arg 1>"
 "$@"

@@ -16,9 +16,11 @@ $ cat output.kml
 cp config.env.EXAMPLE config.env
 # enter values into config.env
 
-./ndev.sh build
-./ndev.sh start 
-./ndev.sh shell # in a separate window
+./ndev build
+./ndev start 
+./ndev shell # in a separate window
+./ndev sync # syncs the container and host portal dirs (TODO FIXME!!!!)
+./ndev jraph_client 3 # retrieve record id "3" from the jraph test database
 ```
 
 ## jraph Model
