@@ -64,7 +64,7 @@ test () {
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
-			-C -U sa -P $JRAPH_SA_PASSWORD -i /root/portal/test.sql
+			-C -U sa -P $JRAPH_SA_PASSWORD -d jongraph -Q "select * from dbo.Products"
 }
 
 # TODO figure out what mount command makes the container filesystem live-update
