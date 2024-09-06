@@ -4,6 +4,11 @@ STAGE_ONE="jraph_build"
 STAGE_TWO="jraph"
 IMAGE_NAME="$STAGE_TWO:latest"
 
+# TODO create help function which lists functions and their docstrings
+# Has ability to limit to one docstring e.g.
+# $ ndev --help **prints all docstrings**
+# $ ndev build --help **prints build docstring**
+
 build () {
 	# TODO REDO using CONTAINERFILE
 	# TODO configgify msql setup options
