@@ -4,6 +4,7 @@ STAGE_ONE="jraph_build"
 STAGE_TWO="jraph"
 IMAGE_NAME="$STAGE_TWO:latest"
 TEST_DATABASE="testdb"
+JRAPH_DATABASE="jraph"
 
 # TODO create help function which lists functions and their docstrings
 # Has ability to limit to one docstring e.g.

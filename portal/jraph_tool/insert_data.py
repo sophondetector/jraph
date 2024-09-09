@@ -77,18 +77,18 @@ def list_conn_dbs():
             print(row)
 
 
-def insert_node(properties, node_id):
+def insert_node(properties, node_id) -> None:
     insert_sql = "INSERT INTO node(properties, node_id) VALUES(?, ?);"
     excomm(insert_sql, json.dumps(properties), node_id)
-    return cur
+    return
 
 
-def insert_edge(source_id, target_id, properties, edge_id):
+def insert_edge(source_id, target_id, properties, edge_id) -> None:
     insert_sql = """
     INSERT INTO edge(source_id, target_id, properties, edge_id)
     VALUES(?, ?, ?, ?);
     """
-    excomm(insert_sql, *args)
+    excomm(insert_sql, source_id, target_id, properties, edge_id)
     return
 
 
@@ -107,5 +107,3 @@ if __name__ == '__main__':
 
     for edge in edges:
         insert_edge(edge['properties'], edge['edge_id'])
-
-    excomm
