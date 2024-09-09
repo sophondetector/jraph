@@ -1,10 +1,11 @@
 1. Create "Big Todo" list of "little things" I need to do to improve the repo; use extant TODOs
 2. Do implementation of python http server, input id 1|2|3 => output out.kml
-3. Do a few "Big Todo" items
+3. deploy as droplet on global ip internet
+3.5 mv jraph-init.sql into jraph_tool/lib
+4. redo containerization and build stuff properly with a CONTAINERFILE
 ./portal/install-sqlserver.sh:13:# TODO configgify the interactive answers
 ./ndev:9:# TODO create help function which lists functions and their docstrings
 ./ndev:22:	# TODO REDO using CONTAINERFILE
 ./ndev:23:	# TODO configgify msql setup options
 ./ndev:24:	# TODO SECURITY remove publish-all
 ./ndev:41:	# TODO make it so sqlserver doesn't try to start at the end of 
-4. deploy as droplet on global ip internet
