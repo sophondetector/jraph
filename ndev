@@ -10,6 +10,13 @@ TEST_DATABASE="testdb"
 # $ ndev --help **prints all docstrings**
 # $ ndev build --help **prints build docstring**
 
+check_pass () {
+	if [[ ! -v JRAPH_SA_PASSWORD ]]; then
+		echo "\$JRAPH_SA_PASSWORD required!"
+		exit 1
+	fi
+}
+
 build () {
 	# TODO REDO using CONTAINERFILE
 	# TODO configgify msql setup options
@@ -24,7 +31,7 @@ build () {
 		--tty \
 		--publish-all \
 		--replace \
-		--volume="./portal/:/root/portal:z" \
+		--volume="./portal/:/root/portal:Z" \
 		"fedora:latest" \
 		"portal/install-sqlserver.sh"
 
@@ -45,7 +52,7 @@ build () {
 		--interactive \
 		--tty \
 		--publish-all \
-		--volume="./portal/:/root/portal:z" \
+		--volume="./portal/:/root/portal:Z" \
 		--name="$STAGE_TWO" \
 		--replace \
 		"$IMAGE_NAME"
@@ -56,18 +63,21 @@ start () {
 }
 
 test.init () {
+	check_pass
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
 			-C -U sa -P $JRAPH_SA_PASSWORD \
-			-i portal/testdb-init.sql -o portal/testdb-init-output.out
+			-i portal/testdb-init.sql 
 }
 
 test () {
+	check_pass
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
-			-C -U sa -P $JRAPH_SA_PASSWORD -d $TEST_DATABASE -Q "select * from dbo.Products"
+			-C -U sa -P $JRAPH_SA_PASSWORD -d $TEST_DATABASE \
+			-Q "select * from dbo.Products"
 }
 
 shell () {
@@ -79,10 +89,5 @@ jraph_client () {
 	podman exec --interactive --tty $STAGE_TWO \
 		/usr/bin/python portal/return_kml.py "$@"
 }
-
-clean () {
-	echo "not implemented" # TODO implement ./ndev clean
-}
-
 
 "$@"
