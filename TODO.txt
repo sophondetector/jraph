@@ -9,3 +9,4 @@
 ./ndev:23:	# TODO configgify msql setup options
 ./ndev:24:	# TODO SECURITY remove publish-all
 ./ndev:41:	# TODO make it so sqlserver doesn't try to start at the end of 
+TODO fix active connections problem!
