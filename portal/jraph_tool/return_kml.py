@@ -14,26 +14,19 @@ def main():
         cur.execute("SELECT * FROM node WHERE node_id=?;",
                     request.args.get("node_id"))
 
-        row = cur.fetchone()
+        node_id, properties_raw = cur.fetchone()
+
+        properties = json.loads(properties_raw)
 
         kml = simplekml.Kml()
 
-        raw = json.loads(row[1])
-
-        pnt = kml.newpoint(
-            name=raw['name'],
-            description=raw['type'],
-            coords=[(raw.get("lat"), raw.get("long"))]
+        kml.newpoint(
+            name=properties.get("name"),
+            description=properties.get('type'),
+            coords=[(properties.get("lat"), properties.get("long"))]
         )
 
         return kml.kml()
-
-        # print(kml.kml())
-
-        # kml.save("output.kml")
-        # print("saved to output.kml")
-
-        # print("finito")
 
 
 if __name__ == '__main__':
