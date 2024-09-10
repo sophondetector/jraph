@@ -23,7 +23,7 @@ def main():
         pnt = kml.newpoint(
             name=raw['name'],
             description=raw['type'],
-            coords=[(raw['lat'], raw['long'])]
+            coords=[(raw.get("lat"), raw.get("long"))]
         )
 
         return kml.kml()
