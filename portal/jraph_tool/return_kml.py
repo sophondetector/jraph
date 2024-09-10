@@ -1,6 +1,6 @@
 import json
 import simplekml
-from flask import Flask
+from flask import Flask, request
 
 import dbc
 
@@ -9,10 +9,10 @@ app = Flask("jraph")
 
 @app.route("/", methods=["GET"])
 def main():
-
+    # for ids, 1=nate, 2=jon, 3=MIIS
     with dbc.get_conn().cursor() as cur:
-        # 3 is the MIIS id
-        cur.execute("SELECT * FROM node WHERE node_id=3;")
+        cur.execute("SELECT * FROM node WHERE node_id=?;",
+                    request.args.get("node_id"))
 
         row = cur.fetchone()
 

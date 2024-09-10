@@ -93,7 +93,7 @@ shell () {
 
 client_request () {
 	podman exec --interactive --tty $STAGE_TWO \
-		curl localhost:5000
+		curl localhost:5000/?node_id=$1
 }
 
 sql () {
