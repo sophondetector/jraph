@@ -9,10 +9,15 @@ _JRAPH_USER = 'sa'
 
 
 def _get_pass():
-    raw = os.getenv("JRAPH_SA_PASSWORD")
-    if raw[0] == '"' and raw[-1] == '"':
-        return raw[1:-1]
-    return raw
+    pw = os.getenv("JRAPH_SA_PASSWORD")
+    if not pw:
+        print("JRAPH_SA_PASSWORD required in env!")
+        exit(1)
+
+    if pw[0] == '"' and pw[-1] == '"':
+        return pw[1:-1]
+
+    return pw
 
 
 def _init_conn(server, username, database) -> pyodbc.Connection:

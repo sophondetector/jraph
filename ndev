@@ -107,4 +107,14 @@ sql () {
 			-i $1
 }
 
+do.push () {
+	# push all run files to digital ocean
+	if [[ ! -v JRAPH_DO_IP ]]; then
+		echo "\$JRAPH_DO_IP required!"
+		exit 1
+	fi
+	scp portal/*.sh scp://root@$JRAPH_DO_IP/portal
+	scp -r portal/*[!__pycache__] scp://root@$JRAPH_DO_IP/portal
+}
+
 "$@"
