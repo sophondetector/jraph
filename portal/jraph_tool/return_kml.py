@@ -1,28 +1,41 @@
 import json
-from dbc import init_jraph_conn
 import simplekml
+from flask import Flask
 
-with init_jraph_conn() as conn:
-    cur = conn.cursor()
+import dbc
 
-    # 3 is the MIIS id
-    cur.execute("SELECT * FROM node WHERE node_id=3;")
+app = Flask("jraph")
 
-    row = cur.fetchone()
 
-    kml = simplekml.Kml()
+@app.route("/", methods=["GET"])
+def main():
 
-    raw = json.loads(row[1])
+    with dbc.get_conn().cursor() as cur:
+        # 3 is the MIIS id
+        cur.execute("SELECT * FROM node WHERE node_id=3;")
 
-    pnt = kml.newpoint(
-        name=raw['name'],
-        description=raw['type'],
-        coords=[(raw['lat'], raw['long'])]
-    )
+        row = cur.fetchone()
 
-    print(kml.kml())
+        kml = simplekml.Kml()
 
-    # kml.save("output.kml")
-    # print("saved to output.kml")
+        raw = json.loads(row[1])
 
-    print("finito")
+        pnt = kml.newpoint(
+            name=raw['name'],
+            description=raw['type'],
+            coords=[(raw['lat'], raw['long'])]
+        )
+
+        return kml.kml()
+
+        # print(kml.kml())
+
+        # kml.save("output.kml")
+        # print("saved to output.kml")
+
+        # print("finito")
+
+
+if __name__ == '__main__':
+    with dbc.init_jraph_conn():
+        app.run(debug=True)
