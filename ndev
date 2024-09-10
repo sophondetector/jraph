@@ -74,7 +74,7 @@ test.init () {
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
 			-C -U sa -P $JRAPH_SA_PASSWORD \
-			-i portal/testdb-init.sql 
+			-i portal/jraph_tool/lib/testdb-init.sql 
 }
 
 test.db () {
@@ -94,6 +94,17 @@ shell () {
 client_request () {
 	podman exec --interactive --tty $STAGE_TWO \
 		curl localhost:5000
+}
+
+sql () {
+	# pass in input file
+	# $ ./ndev sql portal/jraph_tool/lib/example.sql
+	check_pass
+	podman exec --interactive --tty \
+		$STAGE_TWO \
+		/opt/mssql-tools18/bin/sqlcmd \
+			-C -U sa -P $JRAPH_SA_PASSWORD -W \
+			-i $1
 }
 
 "$@"
