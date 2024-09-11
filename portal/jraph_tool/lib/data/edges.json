@@ -4,7 +4,8 @@
 		"source_id": 1,
 		"target_id": 3,
 		"properties": {
-			"type": "attended"
+			"type": "attended",
+			"focus": "nonproliferation"
 		}
 	},
 	{
@@ -28,7 +29,8 @@
 		"source_id": 2,
 		"target_id": 3,
 		"properties": {
-			"type": "attended"
+			"type": "attended",
+			"focus": "terrorism"
 		}
 	}
 ]

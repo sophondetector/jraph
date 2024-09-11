@@ -20,11 +20,7 @@ check_pass () {
 	fi
 }
 
-build () {
-	# TODO REDO using CONTAINERFILE
-	# TODO mssql-server and jraph service on startup 
-	# TODO configgify msql setup options
-	# TODO SECURITY remove publish-all
+build.stage_one () {
 	echo "creating $STAGE_ONE"
 	podman create \
 		--env-file="secrets.env" \
@@ -49,17 +45,28 @@ build () {
 		--change CMD=/opt/mssql/bin/sqlservr \
 		$STAGE_ONE \
 		$IMAGE_NAME
-	
+}
+
+build.stage_two () {
 	echo "creating local jraph container $STAGE_TWO"
 	podman create \
 		--env-file="secrets.env" \
 		--interactive \
 		--tty \
-		--publish-all \
+		--publish 127.0.0.1:5000:5000 \
 		--volume="./portal/:/root/portal:Z" \
 		--name="$STAGE_TWO" \
 		--replace \
 		"$IMAGE_NAME"
+}
+
+build () {
+	# TODO REDO using CONTAINERFILE
+	# TODO mssql-server and jraph service on startup 
+	# TODO configgify msql setup options
+	# TODO SECURITY remove publish-all
+	build.stage_one
+	build.stage_two
 }
 
 start () {
@@ -68,25 +75,16 @@ start () {
 
 start.jraph () {
 	podman exec --interactive --tty $STAGE_TWO \
-		python3 portal/jraph_tool/return_kml.py
+		cd portal && python3 -m jraph_tool
 }
 
-test.init () {
+test.sqlserver () {
 	check_pass
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
 			-C -U sa -P $JRAPH_SA_PASSWORD \
 			-i portal/jraph_tool/lib/testdb-init.sql 
-}
-
-test.db () {
-	check_pass
-	podman exec --interactive --tty \
-		$STAGE_TWO \
-		/opt/mssql-tools18/bin/sqlcmd \
-			-C -U sa -P $JRAPH_SA_PASSWORD -d $TEST_DATABASE \
-			-Q "select * from dbo.Products"
 }
 
 shell () {

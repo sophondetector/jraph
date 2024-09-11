@@ -2,7 +2,8 @@ import json
 import simplekml
 from flask import Flask, request
 
-import dbc
+import jraph_tool.dbc as dbc
+
 
 app = Flask("jraph")
 
@@ -31,5 +32,5 @@ def main():
 
 if __name__ == '__main__':
     with dbc.init_jraph_conn():
-        app.run(debug=True)
+        app.run(debug=True, host="127.0.0.1", port=5000)
         # app.run(debug=True, host="0.0.0.0", port=80)
