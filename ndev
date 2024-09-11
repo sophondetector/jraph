@@ -5,6 +5,8 @@ STAGE_TWO="jraph"
 IMAGE_NAME="$STAGE_TWO:latest"
 TEST_DATABASE="testdb"
 JRAPH_DATABASE="jraph"
+JRAPH_INTERNET_URL="jraph.nathanielhtaylor.com"
+JRAPH_SERVICE_PORT="8000"
 
 # TODO create help function which lists functions and their docstrings
 # Has ability to limit to one docstring e.g.
@@ -20,11 +22,12 @@ check_pass () {
 
 build () {
 	# TODO REDO using CONTAINERFILE
+	# TODO mssql-server and jraph service on startup 
 	# TODO configgify msql setup options
 	# TODO SECURITY remove publish-all
 	echo "creating $STAGE_ONE"
 	podman create \
-		--env-file="config.env" \
+		--env-file="secrets.env" \
 		--memory="2g" \
 		--name="$STAGE_ONE" \
 		--workdir="/root" \
@@ -49,7 +52,7 @@ build () {
 	
 	echo "creating local jraph container $STAGE_TWO"
 	podman create \
-		--env-file="config.env" \
+		--env-file="secrets.env" \
 		--interactive \
 		--tty \
 		--publish-all \
@@ -107,14 +110,13 @@ sql () {
 			-i $1
 }
 
-do.push () {
+push_prod () {
 	# push all run files to digital ocean
-	if [[ ! -v JRAPH_DO_IP ]]; then
-		echo "\$JRAPH_DO_IP required!"
-		exit 1
-	fi
-	scp portal/*.sh scp://root@$JRAPH_DO_IP/portal
-	scp -r portal/*[!__pycache__] scp://root@$JRAPH_DO_IP/portal
+	# TODO write this with rsync
+	PUSH_URL=scp://root@$JRAPH_INTERNET_URL
+	scp portal/*.sh $PUSH_URL/portal
+	scp -r portal/*[!__pycache__] $PUSH_URL/portal
+	scp httpd.conf $PUSH_URL//etc/httpd/conf/httpd.conf
 }
 
 "$@"
