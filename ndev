@@ -75,7 +75,7 @@ start () {
 
 start.jraph () {
 	podman exec --interactive --tty $STAGE_TWO \
-		cd portal && python3 -m jraph_tool
+		portal/run-jraph.sh
 }
 
 test.sqlserver () {
