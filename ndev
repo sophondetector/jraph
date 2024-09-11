@@ -87,19 +87,22 @@ test.sqlserver () {
 			-i portal/jraph_tool/lib/testdb-init.sql 
 }
 
+# start a shell inside the local running jraph service container
+# $ ./ndev shell
 shell () {
 	podman exec --interactive --tty \
 		$STAGE_TWO /bin/bash
 }
 
+# make a request to the running jraph service
+# $ ./ndev client_request 3
 client_request () {
-	podman exec --interactive --tty $STAGE_TWO \
 		curl localhost:5000/?node_id=$1
 }
 
+# run an input sql file in the running sqlserver instance
+# $ ./ndev sql portal/jraph_tool/lib/example.sql
 sql () {
-	# pass in input file
-	# $ ./ndev sql portal/jraph_tool/lib/example.sql
 	check_pass
 	podman exec --interactive --tty \
 		$STAGE_TWO \
@@ -108,13 +111,13 @@ sql () {
 			-i $1
 }
 
+# push all run files to digital ocean 
+# $ ./ndev push_prod
 push_prod () {
-	# push all run files to digital ocean
 	# TODO write this with rsync
 	PUSH_URL=scp://root@$JRAPH_INTERNET_URL
 	scp portal/*.sh $PUSH_URL/portal
 	scp -r portal/*[!__pycache__] $PUSH_URL/portal
-	scp httpd.conf $PUSH_URL//etc/httpd/conf/httpd.conf
 }
 
 "$@"
