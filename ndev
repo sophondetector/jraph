@@ -69,11 +69,11 @@ build () {
 	build.stage_two
 }
 
-start () {
+start.server () {
 	podman start "$@" $STAGE_TWO
 }
 
-start.jraph () {
+start () {
 	podman exec --interactive --tty $STAGE_TWO \
 		portal/run-jraph.sh
 }
@@ -97,7 +97,7 @@ shell () {
 # make a request to the running jraph service
 # $ ./ndev client_request 3
 client_request () {
-		curl localhost:5000/?node_id=$1
+		curl localhost:5000/query?node_id=$1
 }
 
 # run an input sql file in the running sqlserver instance

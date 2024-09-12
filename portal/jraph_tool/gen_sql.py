@@ -7,4 +7,8 @@ with open('portal/jraph_tool/lib/data/edges.json') as fh:
 
 for edge in edges:
     print('''({}, {}, {}, \'{}\'),'''.format(
-        edge['edge_id'], edge['source_id'], edge['target_id'], json.dumps(edge['properties'])))
+        edge['edge_id'],
+        edge['source_id'],
+        edge['target_id'],
+        json.dumps(edge['properties']))
+    )
