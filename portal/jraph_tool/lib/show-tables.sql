@@ -1,1 +1,1 @@
-SELECT name FROM testdb.sys.tables;
+SELECT name FROM jraph.sys.tables;
