@@ -16,12 +16,9 @@ def get_single_node(node_id) -> (int, dict):
         return node_id, json.loads(properties_raw)
 
 
-@app.route("/query", methods=["GET", "POST"])
+@app.route("/query", methods=["GET"])
 def query():
-    if request.method == "POST":
-        node_ids = request.form.get("node_id", '').split(',')
-    else:
-        node_ids = request.args.get("node_id", '').split(',') or [3]
+    node_ids = request.args.get("node_id", '').split(',') or [3]
 
     kml = simplekml.Kml()
     for row in (get_single_node(nid) for nid in node_ids):
