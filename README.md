@@ -20,7 +20,8 @@ The user should receive back an `output.kml` file, which the user can then load 
 The `output.kml` will show the entity locations on the globe, the connections between them, and the label of the connections between them.
 
 ## Dev Basics
-* `ndev` contains shell commands and most config variables at the top
+* `ndev` contains shell commands and most config variables at the top.
+* `./ndev` will list available ndev functions
 * `portal/` is a shared dir between the host dev env and the running service
 * `portal/` is shared with a local dev container, and `./ndev push_prod` pushes local changes to `prod`
 * `secrets.env` is for passwords, `secrets.env.EXAMPLE` is for `.git`
@@ -30,7 +31,13 @@ The `output.kml` will show the entity locations on the globe, the connections be
 cp secrets.env.EXAMPLE secrets.env
 # enter values into secrets.env
 ./ndev build # build the service
-./ndev start # start the service
-./ndev shell # open a shell in the service container
+./ndev loc.start.server # start the sql server 
+./ndev loc.start # start the jraph service
+./ndev loc # open a shell in the service container
 ```
+
+### Deployng
+* Deployed to Digital Ocean
+* See ./ndev doc.* commands
+* Currently deployed to `jraph.nathanielhtaylor.com`
 

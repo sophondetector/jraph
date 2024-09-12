@@ -5,15 +5,11 @@ STAGE_TWO="jraph"
 IMAGE_NAME="$STAGE_TWO:latest"
 TEST_DATABASE="testdb"
 JRAPH_DATABASE="jraph"
-JRAPH_INTERNET_URL="jraph.nathanielhtaylor.com"
-JRAPH_SERVICE_PORT="8000"
+LOCAL_URL="localhost:5000"
+DROPLET_URL="jraph.nathanielhtaylor.com"
+DROPLET_ID="444418486"
 
-# TODO create help function which lists functions and their docstrings
-# Has ability to limit to one docstring e.g.
-# $ ndev --help **prints all docstrings**
-# $ ndev build --help **prints build docstring**
-
-check_pass () {
+_check_pass () {
 	if [[ ! -v JRAPH_SA_PASSWORD ]]; then
 		echo "\$JRAPH_SA_PASSWORD required!"
 		exit 1
@@ -69,17 +65,24 @@ build () {
 	build.stage_two
 }
 
-start.server () {
+# start a shell inside the local running jraph service container
+# $ ./ndev loc
+loc () {
+	podman exec --interactive --tty \
+		$STAGE_TWO /bin/bash
+}
+
+loc.start.server () {
 	podman start "$@" $STAGE_TWO
 }
 
-start () {
+loc.start () {
 	podman exec --interactive --tty $STAGE_TWO \
 		portal/run-jraph.sh
 }
 
-test.sqlserver () {
-	check_pass
+loc.test.sqlserver () {
+	_check_pass
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
@@ -87,23 +90,16 @@ test.sqlserver () {
 			-i portal/jraph_tool/lib/testdb-init.sql 
 }
 
-# start a shell inside the local running jraph service container
-# $ ./ndev shell
-shell () {
-	podman exec --interactive --tty \
-		$STAGE_TWO /bin/bash
-}
-
 # make a request to the running jraph service
 # $ ./ndev client_request 3
-client_request () {
-		curl localhost:5000/query?node_id=$1
+loc.client_request () {
+		curl $LOCAL_URL/query?node_id=$1
 }
 
 # run an input sql file in the running sqlserver instance
 # $ ./ndev sql portal/jraph_tool/lib/example.sql
-sql () {
-	check_pass
+loc.sql () {
+	_check_pass
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
@@ -111,13 +107,34 @@ sql () {
 			-i $1
 }
 
-# push all run files to digital ocean 
-# $ ./ndev push_prod
-push_prod () {
-	# TODO write this with rsync
-	PUSH_URL=scp://root@$JRAPH_INTERNET_URL
-	scp portal/*.sh $PUSH_URL/portal
-	scp -r portal/*[!__pycache__] $PUSH_URL/portal
+# start a shell in the running jraph droplet
+# $ ./ndev doc
+doc () {
+	ssh root@$DROPLET_URL
 }
+
+# turn power for droplet on or off
+# $ ./ndev doc.power on|off
+doc.power () {
+	doctl compute da power-$1 $DROPLET_ID
+}
+
+# push all run files to digital ocean 
+# $ ./ndev doc.sync
+doc.sync () {
+	rsync -avz --exclude __pycache__/ \
+		portal/ root@$DROPLET_URL:/root/portal
+}
+
+
+# TODO create help function which lists functions and their docstrings
+# Has ability to limit to one docstring e.g.
+# $ ndev --help **prints all docstrings**
+# $ ndev build --help **prints build docstring**
+if [[ $# -eq 0 ]]; then
+	echo "available ndev functions..."
+	grep -oP '^[^_][\w\.]+ \(\)' $0
+	exit 0
+fi
 
 "$@"
