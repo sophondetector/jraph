@@ -3,6 +3,7 @@ import simplekml
 from flask import Flask, request, render_template
 
 import jraph_tool.dbc as dbc
+from jraph_tool.xml_from_json import json_to_xml_string
 
 
 app = Flask("jraph")
@@ -35,4 +36,5 @@ def index():
     value = "default value"
     if request.method == "POST":
         value = request.form.to_dict()
+        value = json_to_xml_string(value)
     return render_template("index.html", value=value)
