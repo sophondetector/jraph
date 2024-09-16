@@ -4,24 +4,20 @@
 <head>
 	<title>Jraph Form</title>
 	<link rel="stylesheet" href="static/style.css">
-	<meta http-equiv="refresh" content="1">
+	<!-- <meta http-equiv="refresh" content="1"> -->
 </head>
 
 <body>
 
 	<h1> Jraph KML Creation Tool </h1>
 
-	<form action="/query" method="GET">
-		<input id=queryInput placeholder="enter a comma delimited list of ids e.g. 1,2,3" type="text" name="node_id" />
+	<form method="POST">
+		<input id="queryInput" placeholder="enter a comma delimited list of ids e.g. 1,2,3" type="text" name="node_id" />
 		<button type="submit">Submit Node Query</button>
 	</form>
 
-	<textarea id="kml-display"></textarea>
+	<textarea id="kml-display"> {{ value }} </textarea>
 
 </body>
-
-<script>
-	document.querySelector('#kml-display').textContent = "<hello>"
-</script>
 
 </html>

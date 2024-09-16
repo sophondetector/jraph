@@ -30,6 +30,9 @@ def query():
     return kml.kml()
 
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template("index.html")
+    value = "default value"
+    if request.method == "POST":
+        value = "hello"
+    return render_template("index.html", value=value)
