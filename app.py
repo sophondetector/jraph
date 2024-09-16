@@ -34,5 +34,5 @@ def query():
 def index():
     value = "default value"
     if request.method == "POST":
-        value = "hello"
+        value = request.form.to_dict()
     return render_template("index.html", value=value)
