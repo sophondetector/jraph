@@ -3,7 +3,7 @@ import simplekml
 from flask import Flask, request, render_template
 
 import jraph_tool.dbc as dbc
-from jraph_tool.xml_from_json import json_to_xml_string
+from jraph_tool.xml_from_json import json_to_xml_string, xml_to_string
 
 
 app = Flask("jraph")
@@ -16,25 +16,35 @@ def get_single_node(node_id) -> (int, dict):
         return node_id, json.loads(properties_raw)
 
 
+def node_to_kml(node_id, properties, kml=None):
+    if kml is None:
+        kml = simplekml.Kml()
+    kml.newpoint(
+        name=properties.get("name"),
+        description=properties.get('type'),
+        coords=[(properties.get("lat"), properties.get("long"))]
+    )
+    return kml
+
+
 @app.route("/query", methods=["GET"])
 def query():
     node_ids = request.args.get("node_id", '').split(',') or [3]
-
     kml = simplekml.Kml()
     for row in (get_single_node(nid) for nid in node_ids):
         node_id, properties = row
-        kml.newpoint(
-            name=properties.get("name"),
-            description=properties.get('type'),
-            coords=[(properties.get("lat"), properties.get("long"))]
-        )
+        node_to_kml(node_id, properties, kml)
     return kml.kml()
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    value = "default value"
+    value = "169462"
     if request.method == "POST":
-        value = request.form.to_dict()
-        value = json_to_xml_string(value)
+        node_id = request.form.to_dict().get("node_id")
+        _, properties = get_single_node(node_id)
+        kml = node_to_kml(node_id, properties)
+        value = kml
+        # value = xml_to_string(kml)
+        # value = json_to_xml_string(value)
     return render_template("index.html", value=value)
