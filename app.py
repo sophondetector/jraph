@@ -4,7 +4,6 @@ from flask import Flask, request, render_template
 
 import jraph_tool.dbc as dbc
 
-dbc.init_jraph_conn()
 
 app = Flask("jraph")
 

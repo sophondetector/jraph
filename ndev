@@ -27,9 +27,9 @@ build.stage_one () {
 		--tty \
 		--publish-all \
 		--replace \
-		--volume="./portal/:/root/portal:Z" \
+		--volume="./:/root/jraph:Z" \
 		"fedora:latest" \
-		"portal/install-sqlserver.sh"
+		"jraph/install-sqlserver.sh"
 
 	echo "starting $STAGE_ONE"
 	podman start --attach --interactive $STAGE_ONE
@@ -50,7 +50,7 @@ build.stage_two () {
 		--interactive \
 		--tty \
 		--publish 127.0.0.1:5000:5000 \
-		--volume="./portal/:/root/portal:Z" \
+		--volume="./:/root/jraph:Z" \
 		--name="$STAGE_TWO" \
 		--replace \
 		"$IMAGE_NAME"
@@ -60,7 +60,6 @@ build () {
 	# TODO REDO using CONTAINERFILE
 	# TODO mssql-server and jraph service on startup 
 	# TODO configgify msql setup options
-	# TODO SECURITY remove publish-all
 	build.stage_one
 	build.stage_two
 }
@@ -78,7 +77,11 @@ loc.start.server () {
 
 loc.start () {
 	podman exec --interactive --tty $STAGE_TWO \
-		portal/run-jraph.sh
+		jraph/devops/run-dev.sh
+}
+
+loc.status () {
+	echo "TODO implement loc.status!"
 }
 
 loc.test.sqlserver () {
@@ -87,7 +90,7 @@ loc.test.sqlserver () {
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
 			-C -U sa -P $JRAPH_SA_PASSWORD \
-			-i portal/jraph_tool/lib/testdb-init.sql 
+			-i jraph/lib/testdb-init.sql 
 }
 
 # make a request to the running jraph service
@@ -97,7 +100,7 @@ loc.client_request () {
 }
 
 # run an input sql file in the running sqlserver instance
-# $ ./ndev sql portal/jraph_tool/lib/example.sql
+# $ ./ndev sql jraph/lib/example.sql
 loc.sql () {
 	_check_pass
 	podman exec --interactive --tty \
@@ -122,10 +125,27 @@ doc.power () {
 # push all run files to digital ocean 
 # $ ./ndev doc.sync
 doc.sync () {
-	rsync -avz --exclude __pycache__/ \
-		portal/ root@$DROPLET_URL:/root/portal
+	rsync -av --delete \
+		--exclude=__pycache__/ \
+		--exclude=.git/ \
+		--exclude=.gitignore \
+		--exclude=*.EXAMPLE \
+		--exclude=ndev \
+		--exclude=README.md \
+		./ root@$DROPLET_URL:/root/jraph
 }
 
+doc.start () {
+	ssh root@$DROPLET_URL ./jraph/devops/run-prod.sh
+}
+
+doc.kill () {
+	ssh root@$DROPLET_URL "pkill flask"
+}
+
+doc.status () {
+	echo "TODO implement doc.status!"
+}
 
 # TODO create help function which lists functions and their docstrings
 # Has ability to limit to one docstring e.g.
@@ -133,7 +153,7 @@ doc.sync () {
 # $ ndev build --help **prints build docstring**
 if [[ $# -eq 0 ]]; then
 	echo "available ndev functions..."
-	grep -oP '^[^_][\w\.]+ \(\)' $0
+	grep -oP '^[^_][\w\.]+ \(\)' $0 | sort 
 	exit 0
 fi
 

@@ -1,8 +1,7 @@
+#!/usr/bin/env python
 import json
 
-# this for generating sql value rows for jraph-*-init.sql
-
-with open('portal/jraph_tool/lib/data/edges.json') as fh:
+with open('lib/data/edges.json') as fh:
     edges = json.load(fh)
 
 for edge in edges:
@@ -10,5 +9,5 @@ for edge in edges:
         edge['edge_id'],
         edge['source_id'],
         edge['target_id'],
-        json.dumps(edge['properties']))
+        json.dumps(edge['properties'], ensure_ascii=False))
     )

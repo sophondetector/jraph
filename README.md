@@ -21,9 +21,9 @@ The `output.kml` will show the entity locations on the globe, the connections be
 
 ## Dev Basics
 * `ndev` contains shell commands and most config variables at the top.
-* `./ndev` will list available ndev functions
-* `portal/` is a shared dir between the host dev env and the running service
-* `portal/` is shared with a local dev container, and `./ndev push_prod` pushes local changes to `prod`
+* `./ndev` *without args* will list available ndev functions
+* the repo directory is shared with `/root/jraph` in both the local and prod instances
+* assume everything is going to be run from `/root`, in other words, write as if you were always going to run from `../`
 * `secrets.env` is for passwords, `secrets.env.EXAMPLE` is for `.git`
 
 ### Building and Running Jraph Service Locally
@@ -38,6 +38,12 @@ cp secrets.env.EXAMPLE secrets.env
 
 ### Deployng
 * Deployed to Digital Ocean
-* See ./ndev doc.* commands
+* See `./ndev doc.*` commands
 * Currently deployed to `jraph.nathanielhtaylor.com`
+
+### Building Test DB
+In the root dir run `$ python3 jraph_tool.db_init`.
+
+### TSQL Functions and Admin
+* [docs on tsql funcs](https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-readerrorlog-transact-sql?view=sql-server-ver16)
 
