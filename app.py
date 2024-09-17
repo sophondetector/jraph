@@ -3,7 +3,6 @@ import simplekml
 from flask import Flask, request, render_template
 
 import jraph_tool.dbc as dbc
-from jraph_tool.xml_from_json import json_to_xml_string, xml_to_string
 
 
 app = Flask("jraph")
