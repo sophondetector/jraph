@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import json
 import pandas as pd
 import jraph_tool.dbc as dbc
