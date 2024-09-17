@@ -16,8 +16,6 @@ class Node:
         if type(self.properties) is str:
             self.properties = json.loads(self.properties)
 
-        self.kml = sk.Kml()
-
     def as_kml_point(self, kml=None) -> sk.Kml:
         if kml is None:
             kml = sk.Kml()
@@ -44,7 +42,7 @@ class Edge:
             self.properties = json.loads(self.properties)
 
 
-def query_node(node_id) -> Node:
+def query_node(node_id: int) -> Node:
     with dbc.get_conn().cursor() as cur:
         cur.execute("SELECT * FROM node WHERE node_id=?;", node_id)
         node_id, properties_raw = cur.fetchone()
@@ -65,9 +63,10 @@ def index():
     value = "placeholder"
     if request.method == "POST":
         kml = sk.Kml()
-        nids = request.form.to_dict().get("node_id").split(',')
+        input_query = request.form.to_dict().get("node_id")
+        nids = input_query.split(',')
         for node_id in nids:
             node = query_node(node_id)
             node.as_kml_point(kml)
         value = kml.kml()
-    return render_template("index.html", value=value, previous_query=nids)
+    return render_template("index.html", value=value, previous_query=input_query)
