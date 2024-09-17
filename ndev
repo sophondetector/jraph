@@ -64,6 +64,33 @@ build () {
 	build.stage_two
 }
 
+loc.q () {
+	_check_pass
+	DATABASE=$1
+	INPUT_SQL=$2
+	podman exec --interactive --tty \
+		$STAGE_TWO \
+		/opt/mssql-tools18/bin/sqlcmd \
+			-C \
+			-W \
+			-U sa \
+			-P $JRAPH_SA_PASSWORD \
+			-d $DATABASE \
+			-i $INPUT_SQL
+}
+
+loc.q.jraph () {
+	BASE=/root/jraph
+	INPUT_SQL=$BASE/${1:-lib/sql/show-tables.sql}
+	loc.q jraph $INPUT_SQL
+}
+
+loc.q.master () {
+	BASE=/root/jraph
+	INPUT_SQL=${1:-$BASE/lib/sql/show-tables.sql}
+	loc.q master $INPUT_SQL
+}
+
 # start a shell inside the local running jraph service container
 # $ ./ndev loc
 loc () {
