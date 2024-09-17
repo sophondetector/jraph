@@ -60,7 +60,8 @@ def query():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    value = "placeholder"
+    output = "no queries yet"
+    input_query = None
     if request.method == "POST":
         kml = sk.Kml()
         input_query = request.form.to_dict().get("node_id")
@@ -68,5 +69,5 @@ def index():
         for node_id in nids:
             node = query_node(node_id)
             node.as_kml_point(kml)
-        value = kml.kml()
-    return render_template("index.html", value=value, previous_query=input_query)
+        output = kml.kml()
+    return render_template("index.html", output=output, previous_query=input_query)

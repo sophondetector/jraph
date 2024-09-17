@@ -13,20 +13,22 @@
 
 	<span>Enter a comma delimited list of ids e.g. 1,2,3</span>
 
-	<form method="POST">
-		<input id="queryInput" type="text" name="node_id" value={{ previous_query }} />
+	<form method="POST" id="queryForm">
+		<input id="queryInput" type="text" name="node_id" value={{ previous_query or "169177" }} />
 		<button type="submit">Submit Node Query</button>
 	</form>
 
 	<br>
 
 	<h3>Query</h3>
-	<pre>{{ previous_query }}</pre>
+	<pre id="previousQuery">{{ previous_query }}</pre>
+	<br>
 	<h3>Output</h3>
-
 	<pre id="kml-display">
-{{ value }}
+{{ output }}
 	</pre>
+
+	<a href="/query?node_id={{ previous_query }}"><button id="download">Link to Output Kml</button></a>
 
 </body>
 
