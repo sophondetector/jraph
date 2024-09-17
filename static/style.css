@@ -19,3 +19,7 @@ button {
 	height: 2rem;
 	min-width: 20rem;
 }
+
+#kml-display {
+	font-family: monospace;
+}

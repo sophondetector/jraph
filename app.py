@@ -39,12 +39,10 @@ def query():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    value = "169462"
+    value = "DEFAULT"
     if request.method == "POST":
         node_id = request.form.to_dict().get("node_id")
         _, properties = get_single_node(node_id)
         kml = node_to_kml(node_id, properties)
-        value = kml
-        # value = xml_to_string(kml)
-        # value = json_to_xml_string(value)
+        value = kml.kml()
     return render_template("index.html", value=value)

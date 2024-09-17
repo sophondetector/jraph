@@ -11,12 +11,18 @@
 
 	<h1> Jraph KML Creation Tool </h1>
 
+	<span>Enter a comma delimited list of ids e.g. 1,2,3</span>
+
 	<form method="POST">
-		<input id="queryInput" placeholder="enter a comma delimited list of ids e.g. 1,2,3" type="text" name="node_id" />
+		<input id="queryInput" type="text" name="node_id" value="169462" />
 		<button type="submit">Submit Node Query</button>
 	</form>
 
-	<textarea id="kml-display"> {{ value }} </textarea>
+	<h3>Output</h3>
+
+	<pre id="kml-display">
+{{ value }}
+	</pre>
 
 </body>
 
