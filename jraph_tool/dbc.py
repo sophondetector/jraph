@@ -1,6 +1,8 @@
 import os
 import pyodbc
 
+from jraph_tool import Node
+
 _CONN = None
 
 # cat /etc/odbcinst.ini to find correct val for DRIVER for Sql Server
@@ -32,3 +34,14 @@ def get_conn() -> pyodbc.Connection:
         _CONN = pyodbc.connect(cstring)
         print("done")
     return _CONN
+
+
+def get_cur() -> pyodbc.Cursor:
+    return get_conn().cursor()
+
+
+def query_node(node_id: int) -> Node:
+    with get_cur() as cur:
+        cur.execute("SELECT * FROM node WHERE node_id=?;", node_id)
+        node_id, properties_raw = cur.fetchone()
+        return Node(node_id, properties_raw)
