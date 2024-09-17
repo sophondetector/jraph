@@ -14,10 +14,14 @@
 	<span>Enter a comma delimited list of ids e.g. 1,2,3</span>
 
 	<form method="POST">
-		<input id="queryInput" type="text" name="node_id" value="169462" />
+		<input id="queryInput" type="text" name="node_id" value="169462,67263,166690,169042" />
 		<button type="submit">Submit Node Query</button>
 	</form>
 
+	<br>
+
+	<h3>Query</h3>
+	<pre>{{ previous_query }}</pre>
 	<h3>Output</h3>
 
 	<pre id="kml-display">

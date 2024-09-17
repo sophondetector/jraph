@@ -20,6 +20,6 @@ button {
 	min-width: 20rem;
 }
 
-#kml-display {
+pre {
 	font-family: monospace;
 }
