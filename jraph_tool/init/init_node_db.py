@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import jraph_tool.dbc as dbc
+import jraph_tool.init.init_utils as ut
 
 _INIT_CSV_FP = 'lib/data/init_offshore_data.csv'
 
@@ -19,7 +20,7 @@ def main():
     row_gen = generate_nodes(df)
     with dbc.get_conn() as conn:
         for idx, (nid, props) in enumerate(row_gen):
-            props = nan2none(props)
+            props = ut.nan2none(props)
             with conn.cursor() as cur:
                 cur.execute('SET IDENTITY_INSERT node ON;')
                 cur.execute("INSERT node (node_id, properties) VALUES (?, ?)",
