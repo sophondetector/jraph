@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 
 states = [
     ("alabama", "al"),
@@ -124,7 +125,19 @@ def reverse_zip_parse(addr):
         return mat[0][::-1]
 
 
-TEST_DATA = [
+def nan2none(d):
+    """
+    recurses through dict changing NaN to None
+    """
+    for k in d.keys():
+        if pd.isna(d[k]):
+            d[k] = None
+        if type(d[k]) is dict:
+            d[k] = nan2none(d[k])
+    return d
+
+
+TEST_NODES = [
     {"node_id": 1, "properties": {"name": "foo", "type": "corp"}},
     {"node_id": 2, "properties": {"name": "bar", "type": "corp"}},
     {"node_id": 3, "properties": {"name": "bing", "type": "corp"}},

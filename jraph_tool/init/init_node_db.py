@@ -13,15 +13,6 @@ def generate_nodes(idf):
         idf[cols].to_dict(orient="records"))
 
 
-def nan2none(d):
-    for k in d.keys():
-        if pd.isna(d[k]):
-            d[k] = None
-        if type(d[k]) is dict:
-            d[k] = nan2none(d[k])
-    return d
-
-
 def main():
     print('preparing to insert offshore leaks nodes into jraph.node')
     df = pd.read_csv(_INIT_CSV_FP)

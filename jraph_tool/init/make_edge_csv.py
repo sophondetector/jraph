@@ -43,6 +43,5 @@ if __name__ == '__main__':
     out = pd.concat([start_in_us, end_in_us])
     out.drop('node_id', axis=1, inplace=True)
     out.drop_duplicates(inplace=True)
-    # TODO drop dups!!!
 
     _save_output(out)
