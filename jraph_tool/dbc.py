@@ -69,7 +69,6 @@ def insert_node(
         cur.execute("INSERT node (node_id, properties) VALUES (?, ?)",
                     nid, props)
         cur.commit()
-        return cur.fetchone()
 
 
 def insert_edge(
@@ -94,4 +93,3 @@ def insert_edge(
             "INSERT edge (source_id, target_id, properties) VALUES (?, ?, ?)",
             source_id, target_id, props)
         cur.commit()
-        return cur.fetchone()
