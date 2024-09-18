@@ -1,7 +1,11 @@
 import os
+import json
 import pyodbc
 
+from typing import Optional, Union
+
 from jraph_tool import Node
+from jraph_tool.init.init_utils import nan2none
 
 _CONN = None
 
@@ -45,3 +49,49 @@ def query_node(node_id: int) -> Node:
         cur.execute("SELECT * FROM node WHERE node_id=?;", node_id)
         node_id, properties_raw = cur.fetchone()
         return Node(node_id, properties_raw)
+
+
+def insert_node(
+        nid,
+        props: Optional[Union[dict, str]] = None,
+        cur: Optional[pyodbc.Cursor] = None):
+
+    if cur is None:
+        cur = get_cur()
+
+    if type(props) is dict:
+        props = json.dumps(props)
+        props = nan2none(props)
+        # TODO use a better json encoder for this
+
+    with cur:
+        cur.execute('SET IDENTITY_INSERT node ON;')
+        cur.execute("INSERT node (node_id, properties) VALUES (?, ?)",
+                    nid, props)
+        cur.commit()
+        return cur.fetchone()
+
+
+def insert_edge(
+        source_id: int,
+        target_id: int,
+        props: Optional[Union[dict, str]] = None,
+        cur: Optional[pyodbc.Cursor] = None):
+
+    if cur is None:
+        cur = get_cur()
+
+    if props is None:
+        props = '{}'
+
+    if type(props) is dict:
+        props = json.dumps(props)
+        props = nan2none(props)
+        # TODO use a better json encoder for this
+
+    with cur:
+        cur.execute(
+            "INSERT edge (source_id, target_id, properties) VALUES (?, ?, ?)",
+            source_id, target_id, props)
+        cur.commit()
+        return cur.fetchone()
