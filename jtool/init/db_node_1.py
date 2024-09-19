@@ -3,7 +3,7 @@ import pandas as pd
 import jtool.dbc as dbc
 import jtool.init.utils as ut
 
-_INIT_CSV_FP = 'lib/data/init_offshore_data.csv'
+INIT_CSV_FP = 'lib/data/init_offshore_data.csv'
 
 
 def generate_nodes(idf):
@@ -16,13 +16,13 @@ def generate_nodes(idf):
 
 def main():
     print('preparing to insert offshore leaks nodes into jraph.node')
-    df = pd.read_csv(_INIT_CSV_FP)
+    df = pd.read_csv(INIT_CSV_FP)
     row_gen = generate_nodes(df)
     with dbc.get_conn() as conn:
         for idx, (nid, props) in enumerate(row_gen):
             props = ut.nan2none(props)
             with conn.cursor() as cur:
-                cur.execute('SET IDENTITY_INSERT node ON;')
+                cur.execute('SET IDENTITYINSERT node ON;')
                 cur.execute("INSERT node (node_id, properties) VALUES (?, ?)",
                             nid, json.dumps(props))
                 cur.commit()

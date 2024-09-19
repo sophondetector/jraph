@@ -1,28 +1,28 @@
 import pandas as pd
 
-_EDGE_CSV = '~/Public/Datasets/offshore-leaks-db/relationships.csv'
-_US_ENTITY_CSV = 'lib/data/init_offshore_data.csv'
-_OUTPUT_FP = 'lib/data/init_offshore_edges.csv'
+EDGE_CSV = '~/Public/Datasets/offshore-leaks-db/relationships.csv'
+US_ENTITY_CSV = 'lib/data/init_offshore_data.csv'
+OUTPUT_FP = 'lib/data/init_offshore_edges.csv'
 
 
 def _load_us_edges():
-    print(f'loading offshore leaks data from {_EDGE_CSV}')
-    return pd.read_csv(_OUTPUT_FP, index_col=False)
+    print(f'loading offshore leaks data from {EDGE_CSV}')
+    return pd.read_csv(OUTPUT_FP, index_col=False)
 
 
 def _load_edge():
-    print(f'loading offshore leaks data from {_EDGE_CSV}')
-    return pd.read_csv(_EDGE_CSV, index_col=False)
+    print(f'loading offshore leaks data from {EDGE_CSV}')
+    return pd.read_csv(EDGE_CSV, index_col=False)
 
 
 def _load_us_ents():
-    print(f'loading offshore leaks data from {_US_ENTITY_CSV}')
-    return pd.read_csv(_US_ENTITY_CSV, index_col=False)
+    print(f'loading offshore leaks data from {US_ENTITY_CSV}')
+    return pd.read_csv(US_ENTITY_CSV, index_col=False)
 
 
 def _save_output(df):
-    df.to_csv(_OUTPUT_FP, index=False)
-    print('save to {} success'.format(_OUTPUT_FP))
+    df.to_csv(OUTPUT_FP, index=False)
+    print('save to {} success'.format(OUTPUT_FP))
 
 
 if __name__ == '__main__':
