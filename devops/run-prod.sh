@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # assumes this script is in $jraph_root/devops
 # and we want to be in $jraph_root

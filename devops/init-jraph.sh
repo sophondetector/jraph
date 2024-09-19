@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if [[ ! -v JRAPH_SA_PASSWORD ]]; then
 	echo "\$JRAPH_SA_PASSWORD required!"

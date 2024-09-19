@@ -11,14 +11,6 @@ The `jraph` data model is a *directed* graph data model.
 `jraph` is meant to make extensive use of `Transact SQL`'s `nosql`-esque properties.
 That is, the formal `jraph` schema will stay very small, containing Lat/Long, integer id, name, and an array of connection ids.
 
-## jraph service MVP
-The `jraph` service will have two basic aspects. 
-The first is a running `sqlserver` instance, hosting a database which implements the `jraph model` with some model data.
-The second aspect is a `python` script which takes a posted list of ids and returns an `output.kml` file.
-To communicate with the `jraph` service the client will pass a list of ids into a query string e.g. `https://jraph-service-url.tld/?node_ids=1,3,4`
-The user should receive back an `output.kml` file, which the user can then load into `Google Earth`. 
-The `output.kml` will show the entity locations on the globe, the connections between them, and the label of the connections between them.
-
 ## Dev Basics
 * `ndev` contains shell commands and most config variables at the top.
 * `./ndev` *without args* will list available ndev functions
@@ -42,7 +34,8 @@ cp secrets.env.EXAMPLE secrets.env
 * Currently deployed to `jraph.nathanielhtaylor.com`
 
 ### Building Test DB
-In the root dir run `$ python3 jtool.db_init`.
+1. Run `$ python3 -m jtool.init.csv_*.py` in order.
+1. Run `$ python3 -m jtool.init.db_*.py` in order.
 
 ### TSQL Functions and Admin
 * [docs on tsql funcs](https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-readerrorlog-transact-sql?view=sql-server-ver16)

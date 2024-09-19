@@ -1,8 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-DEPS="mssql-server mssql-tools18 unixODBC-devel"
+SERVICE_NAME="jraph"
+DEPS="mssql-server mssql-tools18 unixODBC-devel python3.12"
 
-echo "installing following SQL Server deps: $DEPS"
+echo "installing dependencies for $SERVICE_NAME"
 
 curl -o /etc/yum.repos.d/mssql-server.repo https://packages.microsoft.com/config/rhel/9/mssql-server-2022.repo
 curl -o /etc/yum.repos.d/mssql-release.repo https://packages.microsoft.com/config/rhel/9/prod.repo
@@ -14,6 +15,18 @@ dnf update --all
 echo "configuring mssql-server service"
 /opt/mssql/bin/mssql-conf setup
 
-echo "making sqlcmd avail in PATH"
+# add sqlcmd to PATH
 echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
 source ~/.bashrc
+
+# python deps
+python3 -m ensurepip --upgrade
+python3 -m pip install --upgrade pip
+
+pip3 install pyodbc
+pip3 install simplekml
+pip3 install python-dotenv
+pip3 install flask
+pip3 install ipython
+pip3 install lxml
+pip3 install pandas
