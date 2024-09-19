@@ -1,21 +1,23 @@
 import pandas as pd
-import jraph_tool.dbc as dbc
+import jtool.dbc as dbc
 
+print('preparing to insert us connected nodes')
 
-EDGE_CSV = 'lib/data/init_offshore_edges.csv'
-DF = pd.read_csv(EDGE_CSV)
+US_CONNECTED_CSV = 'lib/data/us_connected_nodes.csv'
+DF = pd.read_csv(US_CONNECTED_CSV)
 STOP = -1
 SUCCESS = 0
 ERROR = 0
 
 for idx, row in DF.iterrows():
     print('DOING ', idx)
-    props_only = row.drop(['_start', '_end', '_type'])
+    props_only = row.drop(['node_id'])
     props_string = props_only.to_json()
 
     try:
-        res = dbc.insert_edge(row._start, row._end, props_string)
+        res = dbc.insert_node(row.node_id, props_string)
         SUCCESS += 1
+
     except Exception as e:
         ERROR += 1
         print('error at row {}'.format(idx))

@@ -1,5 +1,5 @@
 import pandas as pd
-import jraph_tool.init_scripts.init_db_helpers as dbh
+import jtool.init_scripts.init_db_helpers as dbh
 
 _RAW_CSV_FP = 'nodes-entities.csv'
 _OUTPUT_FP = 'output.csv'

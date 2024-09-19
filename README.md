@@ -42,7 +42,7 @@ cp secrets.env.EXAMPLE secrets.env
 * Currently deployed to `jraph.nathanielhtaylor.com`
 
 ### Building Test DB
-In the root dir run `$ python3 jraph_tool.db_init`.
+In the root dir run `$ python3 jtool.db_init`.
 
 ### TSQL Functions and Admin
 * [docs on tsql funcs](https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-readerrorlog-transact-sql?view=sql-server-ver16)

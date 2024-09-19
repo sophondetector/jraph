@@ -1,7 +1,7 @@
 import simplekml as sk
 from flask import Flask, request, render_template
 
-import jraph_tool.dbc as dbc
+import jtool.dbc as dbc
 
 
 app = Flask("jraph")
