@@ -105,7 +105,6 @@ _STATE_ABBREV_REGEX = re.compile(
     ' +(' + '|'.join(abb for full, abb in states) + ') +'
 )
 
-
 _FULL_2_ABBREV_MAP = {full: short for full, short in states}
 def full2abbrev(state): return _FULL_2_ABBREV_MAP.get(state)
 
