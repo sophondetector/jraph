@@ -5,7 +5,7 @@ import pyodbc
 from typing import Optional, Union
 
 from jtool import Node
-from jtool.init.init_utils import nan2none
+from jtool.init.utils import nan2none
 
 _CONN = None
 
