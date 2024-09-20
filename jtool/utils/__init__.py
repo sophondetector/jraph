@@ -1,21 +1,26 @@
 import re
 import pandas as pd
 
-TEST_NODES = [
-    {"node_id": 1, "properties": {"name": "Nate Taylor", "type": "person", "age": 38}},
-    {"node_id": 2, "properties": {"name": "Jon Miller", "type": "person", "age": 40}},
-    {"node_id": 3, "properties": {"name": "MIIS", "type": "place", "address": {
-        "city": "Montery", "state": "CA"}, "lat": 36.59948, "long": -121.89673}}
-]
 
-TEST_EDGES = [
-    {"source_id": 1, "target_id": 3, "properties": {
-        "type": "attended", "focus": "nonproliferation"}},
-    {"source_id": 2, "target_id": 3, "properties": {
-        "type": "attended", "focus": "terrorism"}},
-]
+class TestData:
+    nodes = [
+        {"node_id": 1, "properties": {
+            "name": "Nate Taylor", "type": "person", "age": 38}},
+        {"node_id": 2, "properties": {
+            "name": "Jon Miller", "type": "person", "age": 40}},
+        {"node_id": 3, "properties": {"name": "MIIS", "type": "place", "address": {
+            "city": "Montery", "state": "CA"}, "lat": 36.59948, "long": -121.89673}}
+    ]
 
-US_STATE_TUPLES = [
+    edges = [
+        {"source_id": 1, "target_id": 3, "properties": {
+            "type": "attended", "focus": "nonproliferation"}},
+        {"source_id": 2, "target_id": 3, "properties": {
+            "type": "attended", "focus": "terrorism"}},
+    ]
+
+
+_US_STATE_TUPLES = [
     ("alabama", "al"),
     ("kentucky", "ky"),
     ("ohio", "oh"),
@@ -75,18 +80,23 @@ US_STATE_TUPLES = [
     ("wyoming", "wy"),
 ]
 
-SPACE_REGEX = re.compile(r'\s\s+')
-USA_REGEX = re.compile(r' ?(usa|u s a|united states of america)( si)?')
-
-
+_SPACE_REGEX = re.compile(r'\s\s+')
+_USA_REGEX = re.compile(r' ?(usa|u s a|united states of america)( si)?')
 _REMOVE_TO_CLEAN_REGEX = re.compile(r'[^a-z0-9 ]')
 _REVERSE_ZIP_REGEX = re.compile(r'(\d\d\d\d\-?)? ?(\d\d\d\d\d)')
 _STATE_REGEX = re.compile(
-    r'\s+(' + '|'.join(full for full, abb in US_STATE_TUPLES) + r')\s+'
+    r'\s+(' + '|'.join(full for full, abb in _US_STATE_TUPLES) + r')\s+'
 )
-_STATE_ABBREV_REGEX = re.compile(
-    r'\s+(' + '|'.join(abb for full, abb in US_STATE_TUPLES) + r')\s+'
+_STATE_ABBR_REGEX = re.compile(
+    r'\s+(' + '|'.join(abb for full, abb in _US_STATE_TUPLES) + r')\s+'
 )
+
+_FULL2ABBR_MAP = {full: abbr for full, abbr in _US_STATE_TUPLES}
+def full2abbr(state): return _FULL2ABBR_MAP.get(state)
+
+
+_ABBR2FULL_MAP = {abbr: full for full, abbr in _US_STATE_TUPLES}
+def abbr2full(state): return _ABBR2FULL_MAP.get(state)
 
 
 def safe_clean_string(s):
@@ -96,7 +106,7 @@ def safe_clean_string(s):
     """
     if type(s) is not str:
         return s
-    s = re.sub(SPACE_REGEX, ' ', s)
+    s = re.sub(_SPACE_REGEX, ' ', s)
     return re.sub(_REMOVE_TO_CLEAN_REGEX, '', s.lower())
 
 
@@ -139,11 +149,3 @@ def nan2none(d):
         if type(d[k]) is dict:
             d[k] = nan2none(d[k])
     return d
-
-
-_FULL_2_ABBREV_MAP = {full: short for full, short in US_STATE_TUPLES}
-def full2abbrev(state): return _FULL_2_ABBREV_MAP.get(state)
-
-
-_ABBREV_2_FULL_MAP = {abb: full for full, abb in US_STATE_TUPLES}
-def abbrev2full(state): return _ABBREV_2_FULL_MAP.get(state)
