@@ -1,5 +1,6 @@
+import io
 import simplekml as sk
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, send_file
 
 import jtool.dbc as dbc
 
@@ -12,8 +13,12 @@ def query():
     node_ids = request.args.get("node_id", '').split(',') or [3]
     kml = sk.Kml()
     for node in (dbc.query_node(nid) for nid in node_ids):
-        node.as_kml_point(kml)
-    return kml.kml()
+        node.add_to_kml(kml)
+    fh = io.BytesIO(kml.kml().encode())
+    return send_file(
+        fh,
+        as_attachment=True,
+        download_name="output.kml")
 
 
 @app.route("/", methods=["GET"])

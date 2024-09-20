@@ -11,7 +11,7 @@ class Node:
         if type(self.properties) is str:
             self.properties = json.loads(self.properties)
 
-    def as_kml_point(self, kml=None) -> sk.Kml:
+    def add_to_kml(self, kml=None) -> sk.Kml:
         if kml is None:
             kml = sk.Kml()
         kml.newpoint(
