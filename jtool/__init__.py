@@ -17,7 +17,7 @@ class Node:
         kml.newpoint(
             name=self.properties.get("name"),
             description=self.properties.get('type'),
-            coords=[(self.properties.get("lat"), self.properties.get("long"))]
+            coords=[(self.properties.get("long"), self.properties.get("lat"))]
         )
         return kml
 

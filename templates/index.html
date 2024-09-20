@@ -13,22 +13,33 @@
 
 	<span>Enter a comma delimited list of ids e.g. 1,2,3</span>
 
-	<form method="POST" id="queryForm">
-		<input id="queryInput" type="text" name="node_id" value={{ previous_query or "169177" }} />
-		<button type="submit">Submit Node Query</button>
-	</form>
-
+	<input id="queryInput" type="text">
+	<button id="querySubmit">Submit Node Query</button>
 	<br>
 
-	<h3>Query</h3>
-	<pre id="previousQuery">{{ previous_query }}</pre>
+	<h3>Previous</h3>
+	<ol id="prev"></ol>
 	<br>
+
 	<h3>Output</h3>
-	<pre id="kml-display">
-{{ output }}
-	</pre>
+	<pre id="kml-display">No output yet</pre>
+	<button id="download">Download KML</button>
 
-	<a href="/query?node_id={{ previous_query }}"><button id="download">Link to Output Kml</button></a>
+	<script>
+		const displayQuery = (query) => {
+			const newSpan = document.createElement('li')
+			newSpan.textContent = query
+			document.querySelector('#prev').appendChild(newSpan)
+		}
+
+		document.querySelector('#querySubmit').addEventListener('click', async () => {
+			const query = document.querySelector('#queryInput').value
+			// TODO regex check here
+			const res = await fetch(`/query?node_id=${query}`)
+			document.querySelector('#kml-display').textContent = await res.text()
+			displayQuery(query)
+		})
+	</script>
 
 </body>
 

@@ -1,6 +1,20 @@
 import re
 import pandas as pd
 
+TEST_NODES = [
+    {"node_id": 1, "properties": {"name": "Nate Taylor", "type": "person", "age": 38}},
+    {"node_id": 2, "properties": {"name": "Jon Miller", "type": "person", "age": 40}},
+    {"node_id": 3, "properties": {"name": "MIIS", "type": "place", "address": {
+        "city": "Montery", "state": "CA"}, "lat": 36.59948, "long": -121.89673}}
+]
+
+TEST_EDGES = [
+    {"source_id": 1, "target_id": 3, "properties": {
+        "type": "attended", "focus": "nonproliferation"}},
+    {"source_id": 2, "target_id": 3, "properties": {
+        "type": "attended", "focus": "terrorism"}},
+]
+
 US_STATE_TUPLES = [
     ("alabama", "al"),
     ("kentucky", "ky"),
@@ -66,6 +80,13 @@ USA_REGEX = re.compile(r' ?(usa|u s a|united states of america)( si)?')
 
 
 _REMOVE_TO_CLEAN_REGEX = re.compile(r'[^a-z0-9 ]')
+_REVERSE_ZIP_REGEX = re.compile(r'(\d\d\d\d\-?)? ?(\d\d\d\d\d)')
+_STATE_REGEX = re.compile(
+    r'\s+(' + '|'.join(full for full, abb in US_STATE_TUPLES) + r')\s+'
+)
+_STATE_ABBREV_REGEX = re.compile(
+    r'\s+(' + '|'.join(abb for full, abb in US_STATE_TUPLES) + r')\s+'
+)
 
 
 def safe_clean_string(s):
@@ -97,22 +118,6 @@ def parse_full_state(addr):
         return mat[0].strip()
 
 
-_REVERSE_ZIP_REGEX = re.compile(r'(\d\d\d\d\-?)? ?(\d\d\d\d\d)')
-_STATE_REGEX = re.compile(
-    r'\s+(' + '|'.join(full for full, abb in US_STATE_TUPLES) + r')\s+'
-)
-_STATE_ABBREV_REGEX = re.compile(
-    r'\s+(' + '|'.join(abb for full, abb in US_STATE_TUPLES) + r')\s+'
-)
-
-_FULL_2_ABBREV_MAP = {full: short for full, short in US_STATE_TUPLES}
-def full2abbrev(state): return _FULL_2_ABBREV_MAP.get(state)
-
-
-_ABBREV_2_FULL_MAP = {abb: full for full, abb in US_STATE_TUPLES}
-def abbrev2full(state): return _ABBREV_2_FULL_MAP.get(state)
-
-
 def reverse_zip_parse(addr):
     """
     this parses an address for a zip code from the right
@@ -136,9 +141,9 @@ def nan2none(d):
     return d
 
 
-TEST_NODES = [
-    {"node_id": 1, "properties": {"name": "foo", "type": "corp"}},
-    {"node_id": 2, "properties": {"name": "bar", "type": "corp"}},
-    {"node_id": 3, "properties": {"name": "bing", "type": "corp"}},
-    {"node_id": 4, "properties": {"name": "boing", "type": "corp"}}
-]
+_FULL_2_ABBREV_MAP = {full: short for full, short in US_STATE_TUPLES}
+def full2abbrev(state): return _FULL_2_ABBREV_MAP.get(state)
+
+
+_ABBREV_2_FULL_MAP = {abb: full for full, abb in US_STATE_TUPLES}
+def abbrev2full(state): return _ABBREV_2_FULL_MAP.get(state)
