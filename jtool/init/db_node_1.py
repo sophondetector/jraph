@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 import jtool.dbc as dbc
-import jtool.init.utils as ut
+import jtool.utils as ut
 
 INIT_CSV_FP = 'lib/data/init_offshore_data.csv'
 

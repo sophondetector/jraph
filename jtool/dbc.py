@@ -5,7 +5,7 @@ import pyodbc
 from typing import Optional, Union
 
 from jtool import Node
-from jtool.init.utils import nan2none
+from jtool.utils import nan2none
 
 _CONN = None
 
@@ -60,8 +60,8 @@ def insert_node(
         cur = get_cur()
 
     if type(props) is dict:
-        props = json.dumps(props)
         props = nan2none(props)
+        props = json.dumps(props)
         # TODO use a better json encoder for this
 
     with cur:
@@ -84,8 +84,8 @@ def insert_edge(
         props = '{}'
 
     if type(props) is dict:
-        props = json.dumps(props)
         props = nan2none(props)
+        props = json.dumps(props)
         # TODO use a better json encoder for this
 
     with cur:
