@@ -1,15 +1,29 @@
 import json
-from typing import Union
+from typing import Union, Optional
 
 import simplekml as sk
 
 
+class Coords:
+    def __init__(self, lat: float, long: float):
+        self.lat = lat
+        self.long = long
+
+
 class Node:
-    def __init__(self, node_id: int, properties: Union[dict, str]):
+    def __init__(
+        self,
+        node_id: int,
+        properties: Union[dict, str],
+        name: Optional[str] = None,
+        coords: Optional[Coords] = None
+    ):
         self.node_id = node_id
         self.properties = properties
         if type(self.properties) is str:
             self.properties = json.loads(self.properties)
+        self.name = name
+        self.coords = coords
 
     def add_to_kml(self, kml=None) -> sk.Kml:
         if kml is None:
