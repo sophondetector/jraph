@@ -14,6 +14,7 @@ def query():
     kml = sk.Kml()
     for node in (dbc.query_node(nid) for nid in node_ids):
         node.add_to_kml(kml)
+    # find edges
     fh = io.BytesIO(kml.kml().encode())
     return send_file(
         fh,

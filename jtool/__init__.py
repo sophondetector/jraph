@@ -21,6 +21,9 @@ class Node:
         )
         return kml
 
+    def __repr__(self):
+        return f'<Node {self.node_id}>'
+
 
 class Edge:
     def __init__(
@@ -35,3 +38,6 @@ class Edge:
         self.properties = properties
         if type(self.properties) is str:
             self.properties = json.loads(self.properties)
+
+    def __repr__(self):
+        return f'<Edge: {self.source_id} -> {self.target_id}>'

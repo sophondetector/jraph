@@ -2,9 +2,9 @@ import os
 import json
 import pyodbc
 
-from typing import Optional, Union
+from typing import Optional, Union, List
 
-from jtool import Node
+from jtool import Node, Edge
 from jtool.utils import nan2none
 
 _CONN = None
@@ -49,6 +49,20 @@ def query_node(node_id: int) -> Node:
         cur.execute("SELECT * FROM node WHERE node_id=?;", node_id)
         node_id, properties_raw = cur.fetchone()
         return Node(node_id, properties_raw)
+
+
+def query_edge_source(source_id) -> List[Edge]:
+    with get_cur() as cur:
+        cur.execute("SELECT * FROM edge WHERE source_id=?;", source_id)
+        edge_rows = cur.fetchall()
+    return [Edge(*row) for row in edge_rows]
+
+
+def query_edge_target(target_id) -> List[Edge]:
+    with get_cur() as cur:
+        cur.execute("SELECT * FROM edge WHERE target_id=?;", target_id)
+        edge_rows = cur.fetchall()
+    return [Edge(*row) for row in edge_rows]
 
 
 def insert_node(
