@@ -16,9 +16,13 @@ def query():
         node = query_node(nid)
         node.add_to_kml(kml)
 
+    seen = set()
     for nid in node_ids:
         edges = query_node_edges(nid)
         for edge in edges:
+            if edge.edge_id in seen:
+                continue
+            seen.add(edge.edge_id)
             if str(edge.source_id) in node_ids and str(edge.target_id) in node_ids:
                 print('ADDING', edge)
                 edge.add_to_kml(kml)
