@@ -1,17 +1,9 @@
-# jraph Data Model and Model Service 
-The name `jraph` is a hip, edgy, fun combination of "Jon" and "graph", which sounds like "giraff."
-`jraph` is a containerized service that implements the `jraph` data model and provides the ability to create `.kml` files from said `jraph` data model.
+# jraph and j2k
+`jraph` is a basic directed graph data model.
 
-## jraph Model
-The `jraph` data model is a *directed* graph data model. 
-`jraph` intends to be (1) integrable with `Google Earth` and `Analyst Notebook`; and (2) intuitive to extend.
-`jraph` intends to make it easy for a group of analysts working from a `jraph` dataset to create `kml` files for viewing in `Google Earth`, in a manner that accomidates "improvised nosql property additions". 
-`jraph` is a data model implemented for `Transact SQL` for use with `Microsoft SQL Server`.
-`jraph` can also be thought of as "intuitive middleware" for a graph database in TSQL on the right, and Google Earth/Analyst Notebook on the left.
-`jraph` is meant to make extensive use of `Transact SQL`'s `nosql`-esque properties.
-That is, the formal `jraph` schema will stay very small, containing Lat/Long, integer id, name, and an array of connection ids.
+`j2k` is a module which outputs `jraph` data as a `kml` file.
 
-## Dev Basics
+## Dev 
 * `ndev` contains shell commands and most config variables at the top.
 * `./ndev` *without args* will list available ndev functions
 * the repo directory is shared with `/root/jraph` in both the local and prod instances

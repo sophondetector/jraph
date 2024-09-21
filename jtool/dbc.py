@@ -3,8 +3,8 @@ import json
 import pyodbc
 from typing import Optional, Union, List
 
-from jtool.utils import nan2none
-from jtool.classes import Node, Edge
+from .utils import nan2none
+from .classes import Node, Edge
 
 _CONN = None
 

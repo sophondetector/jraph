@@ -2,100 +2,90 @@ from typing import Optional, List, Union
 
 import simplekml as sk
 
-from jtool.classes import Node, Edge
-from jtool.dbc import query_node, query_node_edges
+from .classes import Node, Edge
+from .dbc import query_node, query_node_edges
+
+
+_DEFAULT_LAT: float = 43.0
+_DEFAULT_LONG: float = -122.0
+_DEFAULT_NAME = 'JRAPH NODE'
 
 
 class Jraph:
-    nodes: list[Node] = []
-    edges: list[Edge] = []
+    def __init__(
+        self, nodes: Optional[List[Node]] = None,
+        edges: Optional[List[Edge]] = None
+    ):
+        self.nodes = nodes if nodes is not None else []
+        self.edges = edges if edges is not None else []
+        self.name_inc = 0
 
-    _default_lat: float = 43.0
-    _default_long: float = -122.0
-    _default_name = 'jraph node'
-    _default_inc: int = 1
-
-    @classmethod
-    def _get_default_name(cls) -> str:
-        res = f'{cls._default_name} {cls._default_inc}'
-        cls._default_inc += 1
-        return res
-
-    @classmethod
-    def j2k(cls, kml: Optional[sk.Kml] = None) -> sk.Kml:
+    def j2k(self, kml: Optional[sk.Kml] = None) -> sk.Kml:
         if kml is None:
             kml = sk.Kml()
 
-        for node in cls.nodes:
+        for node in self.nodes:
             pnt = kml.newpoint()
-            pnt.name = cls.get_name(node)
-            pnt.coords = [cls.get_coords(node)]
+            pnt.name = self.get_name(node)
+            pnt.coords = [self.get_coords(node)]
 
-        for edge in cls.edges:
-            source = cls.get_jraph_node(edge.source_id)
-            target = cls.get_jraph_node(edge.target_id)
+        for edge in self.edges:
+            source = self.get_jraph_node(edge.source_id)
+            target = self.get_jraph_node(edge.target_id)
             if (source is None) or (target is None):
                 continue
             ls = kml.newlinestring()
-            ls.coords = [cls.get_coords(source), cls.get_coords(target)]
+            ls.coords = [self.get_coords(source), self.get_coords(target)]
 
         return kml
 
-    @classmethod
-    def get_jraph_node(cls, node_id) -> Optional[Node]:
-        for node in cls.nodes:
+    def get_jraph_node(self, node_id) -> Optional[Node]:
+        for node in self.nodes:
             if node.id == node_id:
                 return node
         return None
 
-    @classmethod
-    def get_jraph_edge(cls, edge_id: int) -> Optional[Edge]:
-        for edge in cls.edges:
+    def get_jraph_edge(self, edge_id: int) -> Optional[Edge]:
+        for edge in self.edges:
             if edge.id == edge_id:
                 return edge
         return None
 
-    @classmethod
-    def clear(cls) -> None:
-        cls.nodes = []
-        cls.edges = []
+    def clear(self) -> None:
+        self.nodes = []
+        self.edges = []
 
-    @classmethod
-    def get_coords(cls, node: Node) -> tuple[float, float]:
+    def get_coords(self, node: Node) -> tuple[float, float]:
         return (
-            node.properties.get('long', cls._default_long),
-            node.properties.get('lat', cls._default_lat),
+            node.properties.get('long', _DEFAULT_LONG),
+            node.properties.get('lat', _DEFAULT_LAT),
         )
 
-    @classmethod
-    def get_name(cls, node: Node) -> str:
+    def get_name(self, node: Node) -> str:
         name = node.properties.get('name')
         if name is None:
-            return cls._default_name()
+            name = _DEFAULT_NAME + ' ' + self.name_inc
+            self.name_inc += 1
         return name
 
-    @classmethod
-    def add_node(cls, node: Node) -> None:
-        check = cls.get_jraph_node(node.id)
+    def add_node(self, node: Node) -> None:
+        check = self.get_jraph_node(node.id)
         if check is not None:
             return
-        cls.nodes.append(node)
+        self.nodes.append(node)
 
-    @classmethod
-    def add_edge(cls, edge: Edge) -> None:
-        check = cls.get_jraph_edge(edge.id)
+    def add_edge(self, edge: Edge) -> None:
+        check = self.get_jraph_edge(edge.id)
         if check is not None:
             return
-        cls.edges.append(edge)
+        self.edges.append(edge)
 
-    @classmethod
-    def add_edges(cls, edges: List[Edge]) -> None:
+    def add_edges(self, edges: List[Edge]) -> None:
         for ed in edges:
-            cls.add_edge(ed)
+            self.add_edge(ed)
 
-    @classmethod
     def add(
-        cls,
+        self,
         nodes: Optional[Union[Node, List[Node]]] = None,
         edges: Optional[Union[Edge, List[Edge]]] = None,
     ) -> None:
@@ -103,23 +93,23 @@ class Jraph:
             if type(nodes) is Node:
                 nodes = [nodes]
             for node in nodes:
-                cls.add_node(node)
+                self.add_node(node)
 
         if edges is not None:
             if type(edges) is Edge:
                 edges = [edges]
             for ed in edges:
-                cls.add_edge(ed)
+                self.add_edge(ed)
 
 
 if __name__ == '__main__':
     outpath = 'jraph-test-output.kml'
+    jraph = Jraph()
     for nid in [1, 2, 3]:
         node = query_node(nid)
-        Jraph.add_node(node)
         edges = query_node_edges(nid)
-        Jraph.add_edges(edges)
-    kml = Jraph.j2k()
+        jraph.add(node, edges)
+    kml = jraph.j2k()
     print('saving kml to {}...'.format(outpath), end='')
     kml.save(outpath)
     print('success')

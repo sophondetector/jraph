@@ -1,4 +1,4 @@
-from jtool import insert_node, insert_edge
+from jtool.dbc import insert_node, insert_edge
 
 
 class TestData:

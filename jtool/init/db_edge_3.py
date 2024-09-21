@@ -1,6 +1,5 @@
 import pandas as pd
 import jtool.dbc as dbc
-from jtool import insert_edge
 
 
 EDGE_CSV = 'lib/data/init_offshore_edges.csv'
@@ -15,7 +14,7 @@ for idx, row in DF.iterrows():
     props_string = props_only.to_json()
 
     try:
-        res = insert_edge(row._start, row._end, props_string)
+        res = dbc.insert_edge(row._start, row._end, props_string)
         SUCCESS += 1
     except Exception as e:
         ERROR += 1
