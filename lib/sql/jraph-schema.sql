@@ -21,15 +21,3 @@ CREATE TABLE edge (
 CREATE INDEX idx_edge_source_id ON edge(source_id);
 CREATE INDEX idx_edge_target_id ON edge(target_id);
 
--- PROPERTIES SCHEMA - all optional
--- name str
--- node_type "person"|"place"|"group"|"corp"
--- age int
--- lat float
--- long float
--- address.city str
--- address.state str
--- address.zip_five str /\d\d\d\d\d/
--- address.street str
--- address.country str
-
