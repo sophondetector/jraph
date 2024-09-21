@@ -64,33 +64,6 @@ build () {
 	build.stage_two
 }
 
-loc.q () {
-	_check_pass
-	DATABASE=$1
-	INPUT_SQL=$2
-	podman exec --interactive --tty \
-		$STAGE_TWO \
-		/opt/mssql-tools18/bin/sqlcmd \
-			-C \
-			-W \
-			-U sa \
-			-P $JRAPH_SA_PASSWORD \
-			-d $DATABASE \
-			-i $INPUT_SQL
-}
-
-loc.q.jraph () {
-	BASE=/root/jraph
-	INPUT_SQL=$BASE/${1:-lib/sql/show-tables.sql}
-	loc.q jraph $INPUT_SQL
-}
-
-loc.q.master () {
-	BASE=/root/jraph
-	INPUT_SQL=${1:-$BASE/lib/sql/show-tables.sql}
-	loc.q master $INPUT_SQL
-}
-
 # start a shell inside the local running jraph service container
 # $ ./ndev loc
 loc () {
@@ -107,34 +80,13 @@ loc.start () {
 		jraph/devops/run-dev.sh
 }
 
-loc.status () {
-	echo "TODO implement loc.status!"
-}
-
 loc.test.sqlserver () {
 	_check_pass
 	podman exec --interactive --tty \
 		$STAGE_TWO \
 		/opt/mssql-tools18/bin/sqlcmd \
 			-C -U sa -P $JRAPH_SA_PASSWORD \
-			-i jraph/lib/testdb-init.sql 
-}
-
-# make a request to the running jraph service
-# $ ./ndev client_request 3
-loc.client_request () {
-		curl $LOCAL_URL/query?node_id=$1
-}
-
-# run an input sql file in the running sqlserver instance
-# $ ./ndev sql jraph/lib/example.sql
-loc.sql () {
-	_check_pass
-	podman exec --interactive --tty \
-		$STAGE_TWO \
-		/opt/mssql-tools18/bin/sqlcmd \
-			-C -U sa -P $JRAPH_SA_PASSWORD -W \
-			-i $1
+			-i /root/jraph/lib/sql/testdb-init.sql 
 }
 
 # start a shell in the running jraph droplet
@@ -168,10 +120,6 @@ doc.start () {
 
 doc.kill () {
 	ssh root@$DROPLET_URL "pkill flask"
-}
-
-doc.status () {
-	echo "TODO implement doc.status!"
 }
 
 # TODO create help function which lists functions and their docstrings
