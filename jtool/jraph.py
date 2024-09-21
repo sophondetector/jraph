@@ -27,13 +27,21 @@ class Jraph:
             pnt.coords = [cls.get_coords(node)]
 
         for edge in cls.edges:
-            # TODO get these from cls.nodes
-            source = query_node(edge.source_id)
-            target = query_node(edge.target_id)
+            source = cls.get_jraph_node(edge.source_id)
+            target = cls.get_jraph_node(edge.target_id)
+            if (source is None) or (target is None):
+                continue
             ls = kml.newlinestring()
             ls.coords = [cls.get_coords(source), cls.get_coords(target)]
 
         return kml
+
+    @classmethod
+    def get_jraph_node(cls, node_id) -> Optional[Node]:
+        for node in cls.nodes:
+            if node.id == node_id:
+                return node
+        return None
 
     @classmethod
     def clear(cls) -> None:
@@ -65,7 +73,7 @@ if __name__ == '__main__':
         Jraph.edges.extend(edges)
 
     kml = Jraph.j2k()
-    print('saving kml to {}'.format(outpath))
+    print('saving kml to {}...'.format(outpath), end='')
     kml.save(outpath)
     print('success')
     print('finito')
