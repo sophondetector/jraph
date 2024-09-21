@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Union
 
 import simplekml as sk
 
@@ -12,9 +12,14 @@ class Jraph:
 
     _default_lat: float = 43.0
     _default_long: float = -122.0
-    _default_alt: float = 1.0
-
+    _default_name = 'jraph node'
     _default_inc: int = 1
+
+    @classmethod
+    def _get_default_name(cls) -> str:
+        res = f'{cls._default_name} {cls._default_inc}'
+        cls._default_inc += 1
+        return res
 
     @classmethod
     def j2k(cls, kml: Optional[sk.Kml] = None) -> sk.Kml:
@@ -44,6 +49,13 @@ class Jraph:
         return None
 
     @classmethod
+    def get_jraph_edge(cls, edge_id: int) -> Optional[Edge]:
+        for edge in cls.edges:
+            if edge.id == edge_id:
+                return edge
+        return None
+
+    @classmethod
     def clear(cls) -> None:
         cls.nodes = []
         cls.edges = []
@@ -59,19 +71,54 @@ class Jraph:
     def get_name(cls, node: Node) -> str:
         name = node.properties.get('name')
         if name is None:
-            cls._default_inc += 1
-            name = 'default name ' + cls._default_inc
+            return cls._default_name()
         return name
+
+    @classmethod
+    def add_node(cls, node: Node) -> None:
+        check = cls.get_jraph_node(node.id)
+        if check is not None:
+            return
+        cls.nodes.append(node)
+
+    @classmethod
+    def add_edge(cls, edge: Edge) -> None:
+        check = cls.get_jraph_edge(edge.id)
+        if check is not None:
+            return
+        cls.edges.append(edge)
+
+    @classmethod
+    def add_edges(cls, edges: List[Edge]) -> None:
+        for ed in edges:
+            cls.add_edge(ed)
+
+    @classmethod
+    def add(
+        cls,
+        nodes: Optional[Union[Node, List[Node]]] = None,
+        edges: Optional[Union[Edge, List[Edge]]] = None,
+    ) -> None:
+        if nodes is not None:
+            if type(nodes) is Node:
+                nodes = [nodes]
+            for node in nodes:
+                cls.add_node(node)
+
+        if edges is not None:
+            if type(edges) is Edge:
+                edges = [edges]
+            for ed in edges:
+                cls.add_edge(ed)
 
 
 if __name__ == '__main__':
     outpath = 'output.kml'
     for nid in [1, 2, 3]:
         node = query_node(nid)
-        Jraph.nodes.append(node)
+        Jraph.add_node(node)
         edges = query_node_edges(nid)
-        Jraph.edges.extend(edges)
-
+        Jraph.add_edges(edges)
     kml = Jraph.j2k()
     print('saving kml to {}...'.format(outpath), end='')
     kml.save(outpath)
