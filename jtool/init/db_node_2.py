@@ -1,5 +1,6 @@
 import pandas as pd
 import jtool.dbc as dbc
+from jtool import insert_node
 
 print('preparing to insert us connected nodes')
 
@@ -15,7 +16,7 @@ for idx, row in DF.iterrows():
     props_string = props_only.to_json()
 
     try:
-        res = dbc.insert_node(row.node_id, props_string)
+        res = insert_node(row.node_id, props_string)
         SUCCESS += 1
 
     except Exception as e:

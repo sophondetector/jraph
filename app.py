@@ -2,7 +2,7 @@ import io
 import simplekml as sk
 from flask import Flask, request, render_template, send_file
 
-import jtool.dbc as dbc
+from jtool import query_node, query_node_edges
 
 
 app = Flask("jraph")
@@ -12,9 +12,17 @@ app = Flask("jraph")
 def query():
     node_ids = request.args.get("node_id", '').split(',')
     kml = sk.Kml()
-    for node in (dbc.query_node(nid) for nid in node_ids):
+    for nid in node_ids:
+        node = query_node(nid)
         node.add_to_kml(kml)
-    # find edges
+
+    for nid in node_ids:
+        edges = query_node_edges(nid)
+        for edge in edges:
+            if str(edge.source_id) in node_ids and str(edge.target_id) in node_ids:
+                print('ADDING', edge)
+                edge.add_to_kml(kml)
+
     fh = io.BytesIO(kml.kml().encode())
     return send_file(
         fh,
