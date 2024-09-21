@@ -113,7 +113,7 @@ class Jraph:
 
 
 if __name__ == '__main__':
-    outpath = 'output.kml'
+    outpath = 'jraph-test-output.kml'
     for nid in [1, 2, 3]:
         node = query_node(nid)
         Jraph.add_node(node)
