@@ -64,7 +64,7 @@ class Jraph:
     def get_name(self, node: Node) -> str:
         name = node.properties.get('name')
         if name is None:
-            name = _DEFAULT_NAME + ' ' + self.name_inc
+            name = _DEFAULT_NAME + ' ' + str(self.name_inc)
             self.name_inc += 1
         return name
 

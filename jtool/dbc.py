@@ -48,7 +48,7 @@ def query_node(node_id: int) -> Node:
         cur.execute("SELECT * FROM node WHERE node_id=?;", node_id)
         node_id, properties_raw = cur.fetchone()
         props = json.loads(properties_raw)
-        return Node(node_id, **props)
+        return Node(node_id, props)
 
 
 def query_edge_source(source_id) -> List[Edge]:
@@ -64,7 +64,7 @@ def query_edge_source(source_id) -> List[Edge]:
             source_id = row[1]
             target_id = row[2]
             props = json.loads(row[3])
-            res.append(Edge(edge_id, source_id, target_id, **props))
+            res.append(Edge(edge_id, source_id, target_id, props))
     return res
 
 
