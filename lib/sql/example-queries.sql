@@ -22,6 +22,4 @@ ORDER BY SalesOrderID
     OFFSET 10 ROWS
     FETCH NEXT 10 ROWS ONLY;
 
--- t sql doesn't use limit
-SELECT TOP 10 * FROM node;
 
