@@ -27,7 +27,23 @@ ef['alpha3'] = ef.country_codes.apply(lambda cc: cc.split(';')[0])
 
 ff = ef.merge(df[['lat', 'long', 'alpha3']], on="alpha3", how="inner")
 
-# for i in range(len(ff)):
-#     tmp = ff.props.iloc[i]
-#     tmp.update({"lat": ff.lat.iloc[i], "long": ff.long.iloc[i]})
-#     ff.props.iloc[i] = tmp
+sql_lat = """
+UPDATE node
+SET properties = json_modify(properties, '$.lat', ?)
+WHERE node_id = ?;
+"""
+
+sql_long = """
+UPDATE node
+SET properties = json_modify(properties, '$.long', ?)
+WHERE node_id = ?;
+"""
+
+for idx, row in ff.iterrows():
+    with dbc.get_cur() as cur:
+        cur.execute(sql_lat, row.lat, row.node_id)
+        cur.execute(sql_long, row.long, row.node_id)
+        cur.commit()
+    print('\r{} rows inserted'.format(idx), end='')
+
+print(f'\ninserted {idx} lat longs into jraph.node')
