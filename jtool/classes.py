@@ -1,12 +1,12 @@
 import json
-from typing import Optional
+from typing import Optional, Union
 
 
 class Node:
     def __init__(
         self,
         node_id: int,
-        properties: Optional[dict] = None,
+        properties: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.node_id = node_id
@@ -29,7 +29,7 @@ class Edge:
         edge_id: int,
         source_id: int,
         target_id: int,
-        properties: Optional[dict] = None,
+        properties: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.edge_id = edge_id
