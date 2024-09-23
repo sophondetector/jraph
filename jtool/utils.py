@@ -131,3 +131,37 @@ def nan2none(d):
         if type(d[k]) is dict:
             d[k] = nan2none(d[k])
     return d
+
+
+prop_cols = [
+    "name",
+    "type",
+    "age",
+    "lat",
+    "long",
+    "Age",
+    "node_id",
+    "address",
+    "_id",
+    "original_name",
+    "former_name",
+    "jurisdiction",
+    "jurisdiction_description",
+    "company_type",
+    "internal_id",
+    "incorporation_date",
+    "inactivation_date",
+    "struck_off_date",
+    "dorm_date",
+    "status",
+    "service_provider",
+    "ibcRUC",
+    "country_codes",
+    "countries",
+    "sourceID",
+    "valid_until",
+    "note",
+    "zip",
+    "zip_five",
+    "state"
+]

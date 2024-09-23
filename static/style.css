@@ -2,22 +2,19 @@
 	font-family: serif;
 }
 
-body {
-	max-width: 80ch;
-}
-
 body>* {
 	margin-top: 1rem;
 	margin-left: 1rem;
 }
 
-#queryForm>button {
-	margin-left: 1rem;
+main {
+	display: flex
 }
 
-#queryInput {
-	height: 2rem;
-	min-width: 20rem;
+main>* {
+	margin-right: 1rem;
+	min-width: 50ch;
+	max-width: 80ch;
 }
 
 pre {

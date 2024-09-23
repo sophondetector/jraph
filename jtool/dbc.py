@@ -1,7 +1,7 @@
 import os
 import json
 import pyodbc
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Tuple
 
 from .utils import nan2none
 from .classes import Node, Edge
@@ -43,12 +43,23 @@ def get_cur() -> pyodbc.Cursor:
     return get_conn().cursor()
 
 
+def _row2node(row: Tuple[int, str]) -> Node:
+    node_id, prop_raw = row
+    props = json.loads(prop_raw)
+    return Node(node_id, props)
+
+
+def _row2edge(row: Tuple[int, int, int, str]) -> Edge:
+    eid, sid, tid, prop_str = row
+
+
 def query_node(node_id: int) -> Node:
     with get_cur() as cur:
         cur.execute("SELECT * FROM node WHERE node_id=?;", node_id)
-        node_id, properties_raw = cur.fetchone()
-        props = json.loads(properties_raw)
-        return Node(node_id, props)
+        row = cur.fetchone()
+    if row is None:
+        return None
+    return _row2node(row)
 
 
 def query_edge_source(source_id) -> List[Edge]:
@@ -167,7 +178,11 @@ def query_node_prop(key: str, value) -> List[Node]:
     """.format(key, value)
     with get_cur() as cur:
         cur.execute(sql)
-        return cur.fetchall()
+        rows = cur.fetchall()
+    out = []
+    for r in rows:
+        out.append(_row2node(r))
+    return out
 
 
 def query_edge_prop(key: str, value) -> List[Node]:
@@ -176,4 +191,8 @@ def query_edge_prop(key: str, value) -> List[Node]:
     """.format(key, value)
     with get_cur() as cur:
         cur.execute(sql)
-        return cur.fetchall()
+        rows = cur.fetchall()
+    out = []
+    for r in rows:
+        out.append(_row2node(r))
+    return out
