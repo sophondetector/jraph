@@ -71,6 +71,11 @@ loc () {
 		$STAGE_TWO /bin/bash
 }
 
+loc.ipy () {
+	podman exec --interactive --tty \
+		$STAGE_TWO /bin/sh /root/jraph/devops/start-ipy-term.sh
+}
+
 loc.start.server () {
 	podman start "$@" $STAGE_TWO
 }
