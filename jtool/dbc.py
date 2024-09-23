@@ -81,7 +81,7 @@ def query_edge_target(target_id) -> List[Edge]:
             source_id = row[1]
             target_id = row[2]
             props = json.loads(row[3])
-            res.append(Edge(edge_id, source_id, target_id, **props))
+            res.append(Edge(edge_id, source_id, target_id, props))
     return res
 
 
@@ -133,3 +133,47 @@ def insert_edge(
             "INSERT edge (source_id, target_id, properties) VALUES (?, ?, ?)",
             source_id, target_id, props)
         cur.commit()
+
+
+def set_node_prop(node_id: int, key: str, value) -> None:
+    sql = """
+    UPDATE node
+    SET properties = json_modify(properties, '$.{}', ?)
+    WHERE node_id = ?;
+    """.format(key)
+    with get_cur() as cur:
+        cur.execute(sql, value, node_id)
+        cur.execute(sql, value, node_id)
+        cur.commit()
+        # can check success via cur.rowcount
+
+
+def set_edge_prop(edge_id: int, key: str, value) -> None:
+    sql = """
+    UPDATE edge
+    SET properties = json_modify(properties, '$.{}', ?)
+    WHERE edge_id = ?;
+    """.format(key)
+    with get_cur() as cur:
+        cur.execute(sql, value, edge_id)
+        cur.execute(sql, value, edge_id)
+        cur.commit()
+        # can check success via cur.rowcount
+
+
+def query_node_prop(key: str, value) -> List[Node]:
+    sql = """
+    SELECT * FROM node WHERE json_value(properties, '$.{}') LIKE '%{}%';
+    """.format(key, value)
+    with get_cur() as cur:
+        cur.execute(sql)
+        return cur.fetchall()
+
+
+def query_edge_prop(key: str, value) -> List[Node]:
+    sql = """
+    SELECT * FROM edge WHERE json_value(properties, '$.{}') LIKE '%{}%';
+    """.format(key, value)
+    with get_cur() as cur:
+        cur.execute(sql)
+        return cur.fetchall()
