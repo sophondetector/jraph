@@ -13,6 +13,7 @@ LAST_OUTPUT = DEFAULT_OUTPUT
 
 @app.route("/download", methods=["GET"])
 def download():
+    global LAST_OUTPUT
     fh = io.BytesIO(LAST_OUTPUT.encode())
     return send_file(
         fh,
@@ -22,6 +23,7 @@ def download():
 
 @app.route("/", methods=["GET"])
 def index():
+    global LAST_OUTPUT
     output = "No output yet"
     arg_list = list(request.args.items())
     print('ARGS ', arg_list)
@@ -41,10 +43,13 @@ def index():
     jr = Jraph()
     seen = set()
     for n in nodes:
+        if n is None:
+            continue
         if n.node_id in seen:
             continue
         seen.add(n.node_id)
         jr.add(n)
 
     output = jr.j2k().kml()
+    LAST_OUTPUT = output
     return render_template("index.html", output=output)
