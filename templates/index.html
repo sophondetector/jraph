@@ -13,7 +13,7 @@
 
 	<main>
 		<div>
-			<form method="POST" id="query-form">
+			<form action="/" method="GET" id="query-form">
 				<button type="submit">submit</button>
 				<table>
 					<tr>
@@ -172,8 +172,8 @@
 
 		<div>
 			<h3>Output</h3>
-			<pre id="kml-display">No output yet</pre>
-			<button id="downloadLink" download>Download KML</button>
+			<pre id="kml-display">{{output}}</pre>
+			<a href="/download"><button id="downloadLink" download>Download KML</button></a>
 		</div>
 	</main>
 

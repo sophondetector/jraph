@@ -7,36 +7,44 @@ from jtool.dbc import query_node, query_node_edges, query_node_prop
 
 app = Flask("jraph")
 
-
-# @app.route("/query", methods=["GET"])
-# def query():
-#     jr = Jraph()
-#
-#     node_ids = request.args.get("node_id", '').split(',')
-#     for nid in node_ids:
-#         node = query_node(nid)
-#         edges = query_node_edges(nid)
-#         jr.add(node, edges)
-#
-#     names = request.args.get("name", '').split(',')
-#     for name in names:
-#         node = query_node_prop("name", name)
-#
-#     kml = jr.j2k()
-#     fh = io.BytesIO(kml.kml().encode())
-#     return send_file(
-#         fh,
-#         as_attachment=True,
-#         download_name="output.kml")
+DEFAULT_OUTPUT = "No output yet"
+LAST_OUTPUT = DEFAULT_OUTPUT
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/download", methods=["GET"])
+def download():
+    fh = io.BytesIO(LAST_OUTPUT.encode())
+    return send_file(
+        fh,
+        as_attachment=True,
+        download_name="output.kml")
+
+
+@app.route("/", methods=["GET"])
 def index():
-    s = request.get_data(as_text=True)
-    l = s.split('&')
-    for i in l:
-        k, v = i.split('=')
-        if len(v) > 0:
-            res = query_node_prop(k, v)
-            print(res)
-    return render_template("index.html")
+    output = "No output yet"
+    arg_list = list(request.args.items())
+    print('ARGS ', arg_list)
+    if len(arg_list) < 1:
+        return render_template("index.html", output=output)
+
+    nodes = []
+    for k, v in arg_list:
+        if k == "node_id":
+            node_row = [query_node(v)]
+        elif len(v) > 0:
+            node_row = query_node_prop(k, v)
+        else:
+            node_row = []
+        nodes.extend(node_row)
+
+    jr = Jraph()
+    seen = set()
+    for n in nodes:
+        if n.node_id in seen:
+            continue
+        seen.add(n.node_id)
+        jr.add(n)
+
+    output = jr.j2k().kml()
+    return render_template("index.html", output=output)

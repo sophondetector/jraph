@@ -41,13 +41,13 @@ class Jraph:
 
     def get_jraph_node(self, node_id) -> Optional[Node]:
         for node in self.nodes:
-            if node.id == node_id:
+            if node.node_id == node_id:
                 return node
         return None
 
     def get_jraph_edge(self, edge_id: int) -> Optional[Edge]:
         for edge in self.edges:
-            if edge.id == edge_id:
+            if edge.edge_id == edge_id:
                 return edge
         return None
 
@@ -69,13 +69,13 @@ class Jraph:
         return name
 
     def add_node(self, node: Node) -> None:
-        check = self.get_jraph_node(node.id)
+        check = self.get_jraph_node(node.node_id)
         if check is not None:
             return
         self.nodes.append(node)
 
     def add_edge(self, edge: Edge) -> None:
-        check = self.get_jraph_edge(edge.id)
+        check = self.get_jraph_edge(edge.edge_id)
         if check is not None:
             return
         self.edges.append(edge)
