@@ -15,6 +15,22 @@ LAST_OUTPUT = DEFAULT_OUTPUT
 PREVIOUS_QUERIES = []
 
 
+def _parse_args(arg_string) -> List[Tuple[str, str]]:
+    res = []
+    for tup in map(lambda x: x.split('='), arg_string.split('&')):
+        if len(tup[1]) > 0:
+            res.append(tup)
+    return res
+
+
+def _decode_args(request) -> str:
+    _bytes = request.get_data()
+    raw_str = _bytes.decode()
+    unquoted = unquote(raw_str)
+    final = unquoted.replace('+', ' ')
+    return final
+
+
 @app.route("/download", methods=["GET"])
 def download():
     global LAST_OUTPUT
@@ -25,25 +41,16 @@ def download():
         download_name="output.kml")
 
 
-def _parse_args(arg_string) -> List[Tuple[str, str]]:
-    res = []
-    for tup in map(lambda x: x.split('='), arg_string.split('&')):
-        if len(tup[1]) > 0:
-            res.append(tup)
-    return res
-
-
 @app.route("/", methods=["GET", "POST"])
 def index():
+    global LAST_OUTPUT, PREVIOUS_QUERIES, app
     if request.method == "GET":
         return render_template(
             "index.html", output="none", previous_queries=[])
 
-    global LAST_OUTPUT, PREVIOUS_QUERIES
-    arg_string = unquote(request.get_data(as_text=True))
-    # print('arg string: ', arg_string)
-    arg_list = _parse_args(arg_string)
-    # print('ARGS ', arg_list)
+    decoded = _decode_args(request)
+    arg_list = _parse_args(decoded)
+
     if len(arg_list) < 1:
         LAST_OUTPUT = ''
         PREVIOUS_QUERIES.append("NO QUERY")
