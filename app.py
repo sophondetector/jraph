@@ -24,11 +24,10 @@ def download():
 @app.route("/", methods=["GET"])
 def index():
     global LAST_OUTPUT
-    output = "No output yet"
     arg_list = list(request.args.items())
     print('ARGS ', arg_list)
     if len(arg_list) < 1:
-        return render_template("index.html", output=output)
+        return render_template("index.html", output=LAST_OUTPUT)
 
     nodes = []
     for k, v in arg_list:
@@ -43,6 +42,7 @@ def index():
     jr = Jraph()
     seen = set()
     for n in nodes:
+        # TODO track this down
         if n is None:
             continue
         if n.node_id in seen:
@@ -50,6 +50,5 @@ def index():
         seen.add(n.node_id)
         jr.add(n)
 
-    output = jr.j2k().kml()
-    LAST_OUTPUT = output
-    return render_template("index.html", output=output)
+    LAST_OUTPUT = jr.j2k().kml()
+    return render_template("index.html", output=LAST_OUTPUT)
