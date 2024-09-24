@@ -166,14 +166,16 @@
 
 		<div>
 			<h3>Previous</h3>
-			<ol id="prev"></ol>
+			{% for pq in previous_queries %}
+			<ol id="prev">{{pq}}</ol>
+			{% endfor %}
 			<br>
 		</div>
 
 		<div>
 			<h3>Output</h3>
-			<pre id="kml-display">{{output}}</pre>
 			<a href="/download"><button id="downloadLink" download>Download KML</button></a>
+			<pre id="kml-display">{{output}}</pre>
 		</div>
 	</main>
 
