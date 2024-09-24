@@ -45,22 +45,27 @@ def index():
             continue
         this_query += '{}: {}|'.format(k.strip(), v.strip())
         if k == "node_id":
-            node_row = [query_node(v)]
+            # node_set = [query_node(v)]
+            node_set = map(lambda nid: query_node(nid), v.split(','))
         else:
-            node_row = query_node_prop(k, v)
-        nodes.extend(node_row)
+            node_set = query_node_prop(k, v)
+        nodes.extend(node_set)
     this_query = this_query[:-1]
 
     jr = Jraph()
-    seen = set()
+    seen_nodes = set()
+    seen_edges = set()
     for n in nodes:
         # TODO why there are Nones here sometimes?
         if n is None:
             continue
-        if n.node_id in seen:
+        if n.node_id in seen_nodes:
             continue
-        seen.add(n.node_id)
-        jr.add(n)
+        seen_nodes.add(n.node_id)
+        edges = query_node_edges(n.node_id)
+        edges = filter(lambda e: e.edge_id not in seen_edges, edges)
+        map(lambda ed: seen_edges.add(ed.edge_id), edges)
+        jr.add(nodes=n, edges=edges)
 
     PREVIOUS_QUERIES.append(this_query)
     LAST_OUTPUT = jr.j2k().kml()
