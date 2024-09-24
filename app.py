@@ -1,4 +1,7 @@
 import io
+from typing import List, Tuple
+from urllib.parse import unquote
+
 from flask import Flask, request, render_template, send_file
 
 from jtool.jraph import Jraph
@@ -22,16 +25,28 @@ def download():
         download_name="output.kml")
 
 
-@app.route("/", methods=["GET"])
+def _parse_args(arg_string) -> List[Tuple[str, str]]:
+    res = []
+    for tup in map(lambda x: x.split('='), arg_string.split('&')):
+        if len(tup[1]) > 0:
+            res.append(tup)
+    return res
+
+
+@app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "GET":
+        return render_template(
+            "index.html", output="none", previous_queries=[])
+
     global LAST_OUTPUT, PREVIOUS_QUERIES
-    arg_list = list(request.args.items())
-    filter_args = list(
-        filter(lambda r: r[1], arg_list)
-    )
-    print('ARGS ', filter_args)
-    if len(filter_args) < 1:
+    arg_string = unquote(request.get_data(as_text=True))
+    # print('arg string: ', arg_string)
+    arg_list = _parse_args(arg_string)
+    # print('ARGS ', arg_list)
+    if len(arg_list) < 1:
         LAST_OUTPUT = ''
+        PREVIOUS_QUERIES.append("NO QUERY")
         return render_template(
             "index.html",
             output=LAST_OUTPUT,
@@ -45,10 +60,10 @@ def index():
             continue
         this_query += '{}: {}|'.format(k.strip(), v.strip())
         if k == "node_id":
-            # node_set = [query_node(v)]
             node_set = map(lambda nid: query_node(nid), v.split(','))
         else:
-            node_set = query_node_prop(k, v)
+            node_sets = map(lambda val: query_node_prop(k, val), v.split(','))
+            node_set = [node for node_set in node_sets for node in node_set]
         nodes.extend(node_set)
     this_query = this_query[:-1]
 
