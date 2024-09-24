@@ -3,9 +3,12 @@
 STAGE_ONE="jraph_build"
 STAGE_TWO="jraph"
 IMAGE_NAME="$STAGE_TWO:latest"
+LOCAL_URL="localhost:5000"
+
 TEST_DATABASE="testdb"
 JRAPH_DATABASE="jraph"
-LOCAL_URL="localhost:5000"
+JRAPH_LOG="/tmp/jraph.log"
+
 DROPLET_URL="jraph.nathanielhtaylor.com"
 DROPLET_ID="444418486"
 
@@ -120,10 +123,14 @@ doc.sync () {
 }
 
 doc.start () {
-	ssh root@$DROPLET_URL ./jraph/devops/run-prod.sh
+	ssh root@$DROPLET_URL "./jraph/devops/run-prod.sh"
 }
 
-doc.kill () {
+doc.tail () {
+	ssh root@$DROPLET_URL "tail -f $JRAPH_LOG"
+}
+
+doc.stop () {
 	ssh root@$DROPLET_URL "pkill flask"
 }
 

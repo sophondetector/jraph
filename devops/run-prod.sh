@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
 
-# assumes this script is in $jraph_root/devops
-# and we want to be in $jraph_root
-rundir=$(dirname $0)/..
-cd $rundir
+JRAPH_LOG=/tmp/jraph.log
+RUNDIR=/root/jraph
+
+cd $RUNDIR
 
 flask --env-file secrets.env run \
 	--debug \
 	--extra-files "templates/index.html:static/style.css" \
 	--port 80 \
-	--host 0.0.0.0 
+	--host 0.0.0.0 &>> $JRAPH_LOG
