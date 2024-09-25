@@ -133,13 +133,10 @@ def nan2none(d):
     return d
 
 
-prop_cols = [
+ALL_OFFSHORE_LEAKS_COLUMNS = [
     "name",
-    "type",
-    "age",
     "lat",
     "long",
-    "Age",
     "node_id",
     "address",
     "_id",
