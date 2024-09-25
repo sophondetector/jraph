@@ -7,7 +7,7 @@ LOCAL_URL="localhost:5000"
 
 TEST_DATABASE="testdb"
 JRAPH_DATABASE="jraph"
-JRAPH_LOG="/tmp/jraph.log"
+JRAPH_SERVICE_UNIT="jraph-app.service"
 
 DROPLET_URL="jraph.nathanielhtaylor.com"
 DROPLET_ID="444418486"
@@ -123,14 +123,18 @@ doc.sync () {
 }
 
 doc.start () {
-	ssh root@$DROPLET_URL "./jraph/devops/run-prod.sh"
-}
-
-doc.tail () {
-	ssh root@$DROPLET_URL "tail -f $JRAPH_LOG"
+	ssh root@$DROPLET_URL "systemctl start $JRAPH_SERVICE_UNIT"
 }
 
 doc.stop () {
+	ssh root@$DROPLET_URL "systemctl stop $JRAPH_SERVICE_UNIT"
+}
+
+doc.logs () {
+	ssh root@$DROPLET_URL "journalctl --follow --unit $JRAPH_SERVICE_UNIT"
+}
+
+doc.kill () {
 	ssh root@$DROPLET_URL "pkill flask"
 }
 

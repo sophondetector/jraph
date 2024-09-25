@@ -1,0 +1,4 @@
+[Unit]
+Description=The Jraph web app
+[Service]
+ExecStart=/bin/bash /root/jraph/devops/run-prod.sh

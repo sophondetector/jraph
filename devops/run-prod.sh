@@ -1,12 +1,12 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-JRAPH_LOG=/tmp/jraph.log
-RUNDIR=/root/jraph
+ENV_FILE=secrets.env
+EXTRA_FILES="templates/index.html:static/style.css" 
 
-cd $RUNDIR
+cd /root/jraph
 
-flask --env-file secrets.env run \
+flask --env-file $ENV_FILE run \
 	--debug \
-	--extra-files "templates/index.html:static/style.css" \
+	--extra-files $EXTRA_FILES \
 	--port 80 \
-	--host 0.0.0.0 &>> $JRAPH_LOG
+	--host 0.0.0.0

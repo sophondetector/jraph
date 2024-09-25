@@ -25,6 +25,14 @@ cp secrets.env.EXAMPLE secrets.env
 * See `./ndev doc.*` commands
 * Currently deployed to `jraph.nathanielhtaylor.com`
 
+### Running as a Service
+Jraph runs as a systemctl service named `jraph-app.service`.
+To initialize or reinitialize the service, do the following:
+1.`cp devops/jraph-app.service /usr/lib/systemd/system`.
+1.`systemctl daemon-reload`
+1.`systemctl start jraph-app.service`
+1.`systemctl status jraph-app.service`
+
 ### Building Test DB
 1. Run `$ python3 -m jtool.init.csv_*.py` in order.
 1. Run `$ python3 -m jtool.init.db_*.py` in order.
