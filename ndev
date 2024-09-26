@@ -22,7 +22,7 @@ _check_pass () {
 build.stage_one () {
 	echo "creating $STAGE_ONE"
 	podman create \
-		--env-file="secrets.env" \
+		--env-file=".env" \
 		--memory="2g" \
 		--name="$STAGE_ONE" \
 		--workdir="/root" \
@@ -49,7 +49,7 @@ build.stage_one () {
 build.stage_two () {
 	echo "creating local jraph container $STAGE_TWO"
 	podman create \
-		--env-file="secrets.env" \
+		--env-file=".env" \
 		--interactive \
 		--tty \
 		--publish 127.0.0.1:5000:5000 \

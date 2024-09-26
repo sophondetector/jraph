@@ -5,7 +5,7 @@
 rundir=$(dirname $0)/..
 cd $rundir
 
-flask --env-file secrets.env run \
+flask --env-file .env run \
 	--debug \
 	--extra-files "templates/index.html:static/style.css:static/leaflet.filelayer.js:static/togeojson.js" \
 	--port 5000 \

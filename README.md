@@ -8,12 +8,12 @@
 * `./ndev` *without args* will list available ndev functions
 * the repo directory is shared with `/root/jraph` in both the local and prod instances
 * assume everything is going to be run from `/root`, in other words, write as if you were always going to run from `../`
-* `secrets.env` is for passwords, `secrets.env.EXAMPLE` is for `.git`
+* `.env` is for passwords, `.env.EXAMPLE` is for `.git`
 
 ### Building and Running Jraph Service Locally
 ```sh
-cp secrets.env.EXAMPLE secrets.env
-# enter values into secrets.env
+cp .env.EXAMPLE .env
+# enter values into .env
 ./ndev build # build the service
 ./ndev loc.start.server # start the sql server 
 ./ndev loc.start # start the jraph service

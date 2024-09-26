@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ENV_FILE=secrets.env
+ENV_FILE=.env
 EXTRA_FILES="templates/index.html:static/style.css:static/leaflet.filelayer.js:static/togeojson.js" 
 
 cd /root/jraph
