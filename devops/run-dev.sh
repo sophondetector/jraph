@@ -1,11 +1,23 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-# assumes this script is in $jraph_root/devops
-# and we want to be in $jraph_root
-rundir=$(dirname $0)/..
-cd $rundir
+DEPLOY_ENV="dev"
+ENV_FILE=.env
+EXTRA_FILES_ARR=(
+	templates/index.html
+	static/style.css
+	static/leaflet.filelayer.js
+	static/togeojson.js
+) 
+EXTRA_FILES=$(IFS=: ; echo "${EXTRA_FILES_ARR[*]}")
+HOST="localhost"
+PORT=5000
+RUN_DIR=/root/jraph
 
-flask --env-file .env run \
-	--debug \
-	--extra-files "templates/index.html:static/style.css:static/leaflet.filelayer.js:static/togeojson.js" \
-	--port 5000 \
+FLASK_DEBUG=1
+
+cd $RUN_DIR
+
+flask --env-file $ENV_FILE run \
+	--extra-files $EXTRA_FILES \
+	--port $PORT \
+	--host $HOST
