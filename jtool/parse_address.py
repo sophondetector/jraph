@@ -38,7 +38,9 @@ _name_regex = re.compile(r'^[^\d]+')
 _po_box_regex_no_num = re.compile(r'p\.?o\.?\s+box', re.IGNORECASE)
 _po_box_regex = re.compile(r'p\.?o\.?\s+box\s+\d+', re.IGNORECASE)
 _street_term_regex = re.compile(
-    r'.*(street|avenue|boulevard|highway|st|ave|av|blvd)[\.,]?')
+    r'.*(street|avenue|boulevard|highway|st|ave|av|blvd)[\.,]?',
+    re.IGNORECASE
+)
 
 
 def _parse_name(address: str) -> Optional[str]:
