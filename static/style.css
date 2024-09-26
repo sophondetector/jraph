@@ -12,11 +12,22 @@ main {
 }
 
 main>* {
-	margin-right: 1rem;
 	min-width: 50ch;
-	max-width: 80ch;
+	margin: 5px
 }
 
 pre {
 	font-family: monospace;
+	height: 300px;
+	max-width: 70ch;
+	overflow: scroll;
+}
+
+#prev {
+	max-height: 300px
+}
+
+#map {
+	width: 900px;
+	height: 800px;
 }

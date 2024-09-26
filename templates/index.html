@@ -3,13 +3,21 @@
 
 <head>
 	<title>Jraph Form</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+		integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 	<link rel="stylesheet" href="static/style.css">
+	<script src="static/togeojson.js"></script>
+	<script src="static/leaflet.filelayer.js"></script>
 	<!-- <meta http-equiv="refresh" content="3"> -->
 </head>
 
 <body>
 
-	<h1> Jraph KML Creation Tool </h1>
+	<header>
+		<h1> Jraph KML Creation Tool </h1>
+	</header>
 
 	<main>
 		<div>
@@ -165,6 +173,10 @@
 		</div>
 
 		<div>
+			<h3>Output</h3>
+			<a href="/download">Download KML</a>
+			<pre id="kml-display">{{output}}</pre>
+
 			<h3>Previous</h3>
 			<ol id="prev">
 				{% for pq in previous_queries %}
@@ -174,11 +186,34 @@
 			<br>
 		</div>
 
-		<div>
-			<h3>Output</h3>
-			<a href="/download"><button id="downloadLink" download>Download KML</button></a>
-			<pre id="kml-display">{{output}}</pre>
-		</div>
+		<div id="map"></div>
+
+		<script>
+
+			const map = L.map('map').setView([43.206879, -71.538162], 13);
+
+			const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			}).addTo(map);
+
+			const control = L.Control.fileLayerLoad({
+				layer: L.geoJson,
+				layerOptions: {style: {color: 'red'}},
+				addToMap: true,
+				fileSizeLimit: 1024,
+				formats: [
+					'.geojson',
+					'.kml'
+				]
+			}).addTo(map);
+
+			control.loader.on('data:error', function (error) {
+				console.log('ERROR', error);
+			});
+
+		</script>
+
 	</main>
 
 </body>
