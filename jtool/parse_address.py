@@ -97,10 +97,15 @@ def parse_address(_input: Optional[str], non_us=False) -> ParsedAddress:
 
 if __name__ == '__main__':
     import pandas as pd
-    df = pd.read_csv('lib/data/us_nodes.csv')
+    df = pd.read_csv('~/Public/Datasets/offshore-leaks-db/nodes-addresses.csv')
+    df = df.fillna('')
     stop = 20
-    for idx, addr in enumerate(df.address):
+    for idx, (nid, row) in enumerate(df.iterrows()):
         if idx == stop:
             break
-        res = parse_address(addr)
-        print(res)
+        if 'USA' in row.country_codes:
+            print(parse_address(row.address, non_us=False))
+            continue
+        print(parse_address(row.address, non_us=True))
+
+    print('parse address done')
