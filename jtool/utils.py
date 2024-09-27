@@ -5,6 +5,44 @@ import re
 import pandas as pd
 
 
+class JParse:
+    _fp = 'world-cities.csv'
+    _city_col = 'name'
+    _country_col = 'country'
+    _state_col = 'subcountry'
+    _geonameid = '_geonameid'
+    _df = pd.read_csv(_fp)
+    _df.fillna('', inplace=True)
+
+    cities = [v.lower() for v in _df[_city_col].unique()]
+    countries = [v.lower() for v in _df[_country_col].unique()]
+    states = [v.lower() for v in _df[_state_col].unique() if type(v) is str]
+
+    @classmethod
+    def parse_city(cls, address) -> Optional[str]:
+        lowered = address.lower()
+        for city in cls.cities:
+            if city in lowered:
+                return city
+        return None
+
+    @classmethod
+    def parse_country(cls, address) -> Optional[str]:
+        lowered = address.lower()
+        for country in cls.countries:
+            if country in lowered:
+                return country
+        return None
+
+    @classmethod
+    def parse_state(cls, address) -> Optional[str]:
+        lowered = address.lower()
+        for state in cls.states:
+            if state in lowered:
+                return state
+        return None
+
+
 class UsStateTools:
     tups = [
         ("alabama", "al"),

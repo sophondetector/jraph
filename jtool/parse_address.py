@@ -3,7 +3,7 @@ from typing import Optional
 import re
 import json
 
-from .utils import reverse_zip_parse, UsStateTools
+from .utils import reverse_zip_parse, UsStateTools, safe_clean_string, JParse
 
 
 # this is for osm geocoder api
@@ -36,7 +36,7 @@ class ParsedAddress:
 
 _name_regex = re.compile(r'^[^\d]+')
 _po_box_regex_no_num = re.compile(r'p\.?o\.?\s+box', re.IGNORECASE)
-_po_box_regex = re.compile(r'p\.?o\.?\s+box\s+\d+', re.IGNORECASE)
+_po_box_regex = re.compile(r'p\.?o\.?\s+box\s+[a-z\-]*\d+', re.IGNORECASE)
 _street_term_regex = re.compile(
     r'.*(street|avenue|boulevard|highway|st|ave|av|blvd)[\.,]?',
     re.IGNORECASE
@@ -66,46 +66,50 @@ def _parse_street(address: str) -> Optional[str]:
     return None
 
 
-def _parse_country(address: str) -> Optional[str]:
-    rev = address[::-1]
-    mat = re.match(r'^[^\d]+', rev)
-    if mat:
-        return mat.group()[::-1]
-    return None
-
-
-def _parse_non_us(_input) -> ParsedAddress:
-    res = ParsedAddress(_input)
-    res.country = _parse_country(_input)
-    res.postalcode = reverse_zip_parse(_input)
-    res.name = _parse_name(_input)
-    res.street = _parse_street(_input)
-    return res
-
-
-def parse_address(_input: Optional[str], non_us=False) -> ParsedAddress:
-    if non_us:
-        return _parse_non_us(_input)
-    res = ParsedAddress(_input)
-    res.country = 'usa'
+def parse_non_us_address(_input) -> ParsedAddress:
+    res = ParsedAddress(safe_clean_string(_input))
+    res.country = JParse.parse_country(res.input)
+    res.city = JParse.parse_city(res.input)
+    res.state = JParse.parse_state(res.input)
     res.postalcode = reverse_zip_parse(res.input)
-    res.state = UsStateTools.parse_state(res.input)
     res.name = _parse_name(res.input)
     res.street = _parse_street(res.input)
     return res
 
 
+def parse_us_address(_input: Optional[str]) -> ParsedAddress:
+    res = ParsedAddress(safe_clean_string(_input))
+    res.country = 'usa'
+    res.postalcode = reverse_zip_parse(res.input)
+    res.state = UsStateTools.parse_state(res.input)
+    res.name = _parse_name(res.input)
+    res.street = _parse_street(res.input)
+    res.city = JParse.parse_city(res.input)
+    return res
+
+
+def _by_whitespace(_input: str) -> list[str]:
+    return re.split(r'\s+', _input)
+
+
 if __name__ == '__main__':
+    # import pandas as pd
+    # fp = 'world-cities.csv'
+    # df = pd.read_csv(fp)
+    # import re
+    # df.columns
+    # df = df.fillna('')
+
     import pandas as pd
-    df = pd.read_csv('~/Public/Datasets/offshore-leaks-db/nodes-addresses.csv')
-    df = df.fillna('')
-    stop = 20
+    fp = '~/Public/Datasets/offshore-leaks-db/nodes-addresses.csv'
+    df = pd.read_csv(fp)
+    df.fillna('', inplace=True)
+    stop = 2000
     for idx, (nid, row) in enumerate(df.iterrows()):
         if idx == stop:
             break
         if 'USA' in row.country_codes:
-            print(parse_address(row.address, non_us=False))
+            print(parse_us_address(row.address))
             continue
-        print(parse_address(row.address, non_us=True))
-
+        print(parse_non_us_address(row.address))
     print('parse address done')
