@@ -5,44 +5,6 @@ import re
 import pandas as pd
 
 
-class JParse:
-    _fp = 'world-cities.csv'
-    _city_col = 'name'
-    _country_col = 'country'
-    _state_col = 'subcountry'
-    _geonameid = '_geonameid'
-    _df = pd.read_csv(_fp)
-    _df.fillna('', inplace=True)
-
-    cities = [v.lower() for v in _df[_city_col].unique()]
-    countries = [v.lower() for v in _df[_country_col].unique()]
-    states = [v.lower() for v in _df[_state_col].unique() if type(v) is str]
-
-    @classmethod
-    def parse_city(cls, address) -> Optional[str]:
-        lowered = address.lower()
-        for city in cls.cities:
-            if city in lowered:
-                return city
-        return None
-
-    @classmethod
-    def parse_country(cls, address) -> Optional[str]:
-        lowered = address.lower()
-        for country in cls.countries:
-            if country in lowered:
-                return country
-        return None
-
-    @classmethod
-    def parse_state(cls, address) -> Optional[str]:
-        lowered = address.lower()
-        for state in cls.states:
-            if state in lowered:
-                return state
-        return None
-
-
 class UsStateTools:
     tups = [
         ("alabama", "al"),
@@ -157,36 +119,62 @@ class UsStateTools:
         return None
 
 
-class DataTools:
-    OFFSHORE_LEAKS_COLUMNS = [
-        "name",
-        "lat",
-        "long",
-        "node_id",
-        "address",
-        "_id",
-        "original_name",
-        "former_name",
-        "jurisdiction",
-        "jurisdiction_description",
-        "company_type",
-        "internal_id",
-        "incorporation_date",
-        "inactivation_date",
-        "struck_off_date",
-        "dorm_date",
-        "status",
-        "service_provider",
-        "ibcRUC",
-        "country_codes",
-        "countries",
-        "sourceID",
-        "valid_until",
-        "note",
-        "zip",
-        "zip_five",
-        "state"
-    ]
+class AddressParser:
+    """
+    Parse addresses into component parts
+    """
+    _fp = 'lib/data/country_subcountry_city.csv'
+    _city_col = 'name'
+    _country_col = 'country'
+    _country_code_col = 'country_code'
+    _state_col = 'subcountry'
+    _geonameid = '_geonameid'
+    _df = pd.read_csv(_fp)
+    _df.fillna('', inplace=True)
+
+    countries = [v.lower() for v in _df[_country_col].unique()]
+    cities = [v.lower() for v in _df[_city_col].unique()]
+    states_us_full = [full for full, abbr in UsStateTools.tups]
+    states_us_abbr = [abbr for full, abbr in UsStateTools.tups]
+    states_non_us = _df.loc[_df[_country_code_col] != 'USA']
+
+    COUNTRY_REGEX = re.compile(
+        r'\b(' + r'|'.join(countries) + r')\b',
+        re.IGNORECASE
+    )
+
+    # TODO make per country/state
+    CITY_REGEX = re.compile(
+        r'\b(' + r'|'.join(cities) + r')\b',
+        re.IGNORECASE
+    )
+
+    FULL_US_STATE_REGEX = re.compile(
+        r'\b(' + r'|'.join(states_us_full) + r')\b',
+        re.IGNORECASE
+    )
+
+    ABBR_US_STATE_REGEX = re.compile(
+        r'\s+(' + '|'.join(states_us_abbr) + r')\s+',
+        re.IGNORECASE
+    )
+
+    NON_US_STATE_REGEX = re.compile(
+        r'\s+(' + '|'.join(states_non_us) + r')\s+',
+        re.IGNORECASE
+    )
+
+    @classmethod
+    def parse_city(cls, address) -> Optional[str]:
+        raise NotImplementedError()
+
+    @classmethod
+    def parse_country(cls, address) -> Optional[str]:
+        raise NotImplementedError()
+
+    @classmethod
+    def parse_full_state(cls, address) -> Optional[str]:
+        raise NotImplementedError()
 
 
 _SPACE_REGEX = re.compile(r'\s\s+')
@@ -239,3 +227,35 @@ def nan2none(d):
         if type(d[k]) is dict:
             d[k] = nan2none(d[k])
     return d
+
+
+class DataTools:
+    OFFSHORE_LEAKS_COLUMNS = [
+        "name",
+        "lat",
+        "long",
+        "node_id",
+        "address",
+        "_id",
+        "original_name",
+        "former_name",
+        "jurisdiction",
+        "jurisdiction_description",
+        "company_type",
+        "internal_id",
+        "incorporation_date",
+        "inactivation_date",
+        "struck_off_date",
+        "dorm_date",
+        "status",
+        "service_provider",
+        "ibcRUC",
+        "country_codes",
+        "countries",
+        "sourceID",
+        "valid_until",
+        "note",
+        "zip",
+        "zip_five",
+        "state"
+    ]
