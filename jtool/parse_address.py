@@ -81,34 +81,39 @@ _FULL2ABBR_MAP = {full: abbr for full, abbr in _US_STATE_TUPLES}
 _ABBR2FULL_MAP = {abbr: full for full, abbr in _US_STATE_TUPLES}
 
 
-def full2abbr(full): return _FULL2ABBR_MAP.get(full)
-def abbr2full(abbr): return _ABBR2FULL_MAP.get(abbr)
+def full2abbr(full):
+    res = _FULL2ABBR_MAP.get(full.lower())
+    return res.upper()
+
+
+def abbr2full(abbr): return _ABBR2FULL_MAP.get(abbr.lower())
 
 
 # this is for osm geocoder api
 class ParsedAddress:
     def __init__(
         self,
-        input: str,
+        _input: str,
         name: Optional[str] = None,
         street: Optional[str] = None,
         city: Optional[str] = None,
         state: Optional[str] = None,
         country: Optional[str] = None,
-        postalcode: Optional[str] = None,
+        zip: Optional[str] = None,
     ):
+        self._input = _input
         self.name = name
         self.street = street
         self.city = city
         self.state = state
         self.country = country
-        self.postalcode = postalcode
+        self.zip = zip
 
     def __repr__(self) -> str:
         return json.dumps(self.__dict__, indent=4)
 
 
-class AddressParser:
+class UsAddressParser:
     """
     Parse addresses into component parts
     """
@@ -125,11 +130,11 @@ class AddressParser:
 
     all_cities = _df[_city_col].unique()
     us_cities = _df.loc[_df[_country_code_col] == 'USA'][_city_col]
-    non_us_cities = _df.loc[_df[_country_code_col] != 'USA'][_city_col]
+    # non_us_cities = _df.loc[_df[_country_code_col] != 'USA'][_city_col]
 
     states_us_full = [full for full, abbr in _US_STATE_TUPLES]
     states_us_abbr = [abbr for full, abbr in _US_STATE_TUPLES]
-    states_non_us = _df.loc[_df[_country_code_col] != 'USA'].as_list()
+    # states_non_us = _df.loc[_df[_country_code_col] != 'USA'].to_list()
 
     # def _make_regex(list_of_strings) -> re.Pattern:
     #     return re.compile(
@@ -144,10 +149,10 @@ class AddressParser:
     )
 
     # TODO make per country/state
-    NON_US_CITY_REGEX = re.compile(
-        r'\b(' + r'|'.join(non_us_cities) + r')\b',
-        re.IGNORECASE
-    )
+    # NON_US_CITY_REGEX = re.compile(
+    #     r'\b(' + r'|'.join(non_us_cities) + r')\b',
+    #     re.IGNORECASE
+    # )
 
     FULL_US_STATE_REGEX = re.compile(
         r'\b(' + r'|'.join(states_us_full) + r')\b',
@@ -159,13 +164,13 @@ class AddressParser:
         re.IGNORECASE
     )
 
-    NON_US_STATE_REGEX = re.compile(
-        r'\s+(' + '|'.join(states_non_us) + r')\s+',
-        re.IGNORECASE
-    )
+    # NON_US_STATE_REGEX = re.compile(
+    #     r'\s+(' + '|'.join(states_non_us) + r')\s+',
+    #     re.IGNORECASE
+    # )
 
     @classmethod
-    def parse_name(cls, address) -> Optional[str]:
+    def _parse_name(cls, address) -> Optional[str]:
         mat = _NAME_REGEX.match(address)
         if mat:
             out = mat.group()
@@ -175,7 +180,7 @@ class AddressParser:
         return None
 
     @classmethod
-    def parse_street(cls, address: str) -> Optional[str]:
+    def _parse_street(cls, address: str) -> Optional[str]:
         pob_mat = _PO_BOX_REGEX.search(address)
         if pob_mat:
             return pob_mat.group().strip()
@@ -187,30 +192,33 @@ class AddressParser:
         return None
 
     @classmethod
-    def parse_city(cls, address) -> Optional[str]:
-        raise NotImplementedError()
+    def _parse_city(cls, address) -> Optional[str]:
+        mat = cls.US_CITY_REGEX.search(address)
+        if mat:
+            return mat.group().strip()
+        return None
+
+    # @classmethod
+    # def parse_country(cls, address) -> Optional[str]:
+    #     raise NotImplementedError()
 
     @classmethod
-    def parse_country(cls, address) -> Optional[str]:
-        raise NotImplementedError()
-
-    @classmethod
-    def parse_state(cls, address) -> Optional[str]:
+    def _parse_state(cls, address) -> Optional[str]:
         """tries full, then abbrev, always returns abbreviation"""
         full_res = cls._parse_state_full(address)
         if full_res is not None:
-            return cls.full2abbr(full_res)
+            return full2abbr(full_res)
         abb_res = cls._parse_state_abbr(address)
         if abb_res is None:
             print('couldnt find state in address {}'.format(address))
         return abb_res
 
     @classmethod
-    def parse_zip(cls, address) -> Optional[str]:
+    def _parse_zip(cls, address) -> Optional[str]:
         return cls._reverse_zip_parse(address)
 
     @classmethod
-    def _reverse_zip_parse(addr) -> Optional[str]:
+    def _reverse_zip_parse(cls, addr) -> Optional[str]:
         """
         this parses an address for a zip code from the right
         """
@@ -222,17 +230,27 @@ class AddressParser:
 
     @classmethod
     def _parse_state_full(cls, addr) -> Optional[str]:
-        mat = re.search(cls._FULL_STATE_REGEX, addr)
+        mat = re.search(cls.FULL_US_STATE_REGEX, addr)
         if mat:
             return mat[0].strip()
         return None
 
     @classmethod
     def _parse_state_abbr(cls, addr) -> Optional[str]:
-        mat = re.search(cls._ABBR_STATE_REGEX, addr)
+        mat = re.search(cls.ABBR_US_STATE_REGEX, addr)
         if mat:
             return mat[0].strip()
         return None
+
+    @classmethod
+    def parse(cls, _input) -> ParsedAddress:
+        output = ParsedAddress(_input, country='USA')
+        output.zip = cls._parse_zip(_input)
+        output.state = cls._parse_state(_input)
+        output.city = cls._parse_city(_input)
+        output.street = cls._parse_street(_input)
+        output.name = cls._parse_name(_input)
+        return output
 
 
 if __name__ == '__main__':
@@ -240,12 +258,11 @@ if __name__ == '__main__':
     fp = '~/Public/Datasets/offshore-leaks-db/nodes-addresses.csv'
     df = pd.read_csv(fp)
     df.fillna('', inplace=True)
+    df = df[df.apply(lambda r: 'USA' in r.country_codes, axis=1)]
     stop = 2000
     for idx, (nid, row) in enumerate(df.iterrows()):
         if idx == stop:
             break
-        if 'USA' in row.country_codes:
-            print(parse_us_address(row.address))
-            continue
-        print(parse_non_us_address(row.address))
-    print('parse address done')
+        res = UsAddressParser.parse(row.address)
+        print(res)
+    print('parse address test done')
