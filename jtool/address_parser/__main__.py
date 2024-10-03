@@ -12,7 +12,7 @@ _NAME_REGEX = re.compile(r'^[^\d]+')
 _PO_BOX_REGEX_NO_NUM = re.compile(r'p\.?o\.?\s+box', re.IGNORECASE)
 _PO_BOX_REGEX = re.compile(r'p\.?o\.?\s+box\s+[a-z\-]*\d+', re.IGNORECASE)
 _STREET_TERM_REGEX = re.compile(
-    r'.*(street|avenue|boulevard|highway|st|ave?|blvd)[\.,]?',
+    r'.*(street|avenue|boulevard|highway|st|ave?|blvd|court|ct)[\.,]?',
     re.IGNORECASE
 )
 
