@@ -138,6 +138,34 @@ doc.kill () {
 	ssh root@$DROPLET_URL "pkill flask"
 }
 
+doc.compare () {
+	echo "COMPARE"
+	LOCAL_DIST=$PWD
+	REMOTE_DIST=scp://root@jraph.nathanielhtaylor.com/jraph
+	CACHED_REMOTE_DIST=/tmp/jraph.remote
+
+	if [[ -d $CACHED_REMOTE_DIST ]]; then
+		echo "clearing cache..."
+		rm -rf $CACHED_REMOTE_DIST
+	fi
+
+	echo "copying $REMOTE_URI to $CACHED_REMOTE_DIST to compare..."
+	scp -r $REMOTE_DIST $CACHED_REMOTE_DIST
+	echo "diffing folders"
+	diff --color=always -r $LOCAL_DIST $CACHED_REMOTE_DIST
+}
+
+doc.sqlcmd () {
+	_check_pass
+	podman exec --interactive --tty \
+		$STAGE_TWO \
+		/opt/mssql-tools18/bin/sqlcmd \
+			-C -U sa -P $JRAPH_SA_PASSWORD \
+			-S $DROPLET_URL \
+			-d $JRAPH_DATABASE 
+			# -q "select * from node where node_id=1"
+}
+
 # TODO create help function which lists functions and their docstrings
 # Has ability to limit to one docstring e.g.
 # $ ndev --help **prints all docstrings**
