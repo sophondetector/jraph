@@ -1,4 +1,5 @@
 from typing import Optional
+from copy import deepcopy
 
 import re
 import json
@@ -90,7 +91,7 @@ def abbr2full(abbr): return _ABBR2FULL_MAP.get(abbr.lower())
 
 
 # this is for osm geocoder api
-class ParsedAddress:
+class UsAddress:
     def __init__(
         self,
         _input: str,
@@ -98,7 +99,6 @@ class ParsedAddress:
         street: Optional[str] = None,
         city: Optional[str] = None,
         state: Optional[str] = None,
-        country: Optional[str] = None,
         zip: Optional[str] = None,
     ):
         self._input = _input
@@ -106,11 +106,18 @@ class ParsedAddress:
         self.street = street
         self.city = city
         self.state = state
-        self.country = country
         self.zip = zip
+        self.country = 'USA'
 
     def __repr__(self) -> str:
         return json.dumps(self.__dict__, indent=4)
+
+    def to_dict(self, include_input: bool = True) -> dict:
+        res = deepcopy(self.__dict__)
+        if include_input:
+            return res
+        res.pop('_input')
+        return res
 
 
 class UsAddressParser:
@@ -243,8 +250,8 @@ class UsAddressParser:
         return None
 
     @classmethod
-    def parse(cls, _input) -> ParsedAddress:
-        output = ParsedAddress(_input, country='USA')
+    def parse(cls, _input) -> UsAddress:
+        output = UsAddress(_input)
         output.zip = cls._parse_zip(_input)
         output.state = cls._parse_state(_input)
         output.city = cls._parse_city(_input)
