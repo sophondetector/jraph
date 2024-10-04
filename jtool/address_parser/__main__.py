@@ -16,7 +16,7 @@ _NAME_REGEX = re.compile(r'^[^\d]+')
 _PO_BOX_REGEX_NO_NUM = re.compile(r'p\.?o\.?\s+box', re.IGNORECASE)
 _PO_BOX_REGEX = re.compile(r'p\.?o\.?\s+box\s+[a-z\-]*\d+', re.IGNORECASE)
 _STREET_TERM_REGEX = re.compile(
-    r'.*\b(street|avenue|boulevard|highway|st|ave?|blvd|court|ct|lane|ln|place|plaza|pl)[\.,]?\b',
+    r'.*(\b|\d+)(street|avenue|boulevard|highway|st|ave?|blvd|court|ct|lane|ln|place|plaza|pl|way|road|rd|terrace|terr|expressway|run|drive|dr|circle|cir)[\.,]?\b',
     re.IGNORECASE
 )
 
