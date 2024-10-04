@@ -6,6 +6,9 @@ import json
 
 import pandas as pd
 
+from .utils import full2abbr, STATES_ABBR, STATES_FULL, zip2city, zip2state
+from .us_city_list import US_CITIES
+
 _REVERSE_ZIP_REGEX = re.compile(r'(\d\d\d\d\-?)? ?(\d\d\d\d\d)')
 _USA_REGEX = re.compile(
     r'\b(usa|u s a|united states of america)\b(si)?', re.IGNORECASE)
@@ -13,81 +16,9 @@ _NAME_REGEX = re.compile(r'^[^\d]+')
 _PO_BOX_REGEX_NO_NUM = re.compile(r'p\.?o\.?\s+box', re.IGNORECASE)
 _PO_BOX_REGEX = re.compile(r'p\.?o\.?\s+box\s+[a-z\-]*\d+', re.IGNORECASE)
 _STREET_TERM_REGEX = re.compile(
-    r'.*(street|avenue|boulevard|highway|st|ave?|blvd|court|ct)[\.,]?',
+    r'.*\b(street|avenue|boulevard|highway|st|ave?|blvd|court|ct|lane|ln|place|plaza|pl)[\.,]?\b',
     re.IGNORECASE
 )
-
-
-_US_STATE_TUPLES = [
-    ("alabama", "al"),
-    ("kentucky", "ky"),
-    ("ohio", "oh"),
-    ("alaska", "ak"),
-    ("louisiana", "la"),
-    ("oklahoma", "ok"),
-    ("arizona", "az"),
-    ("maine", "me"),
-    ("oregon", "or"),
-    ("arkansas", "ar"),
-    ("maryland", "md"),
-    ("pennsylvania", "pa"),
-    ("american samoa", "as"),
-    ("massachusetts", "ma"),
-    ("puerto rico", "pr"),
-    ("california", "ca"),
-    ("michigan", "mi"),
-    ("rhode island", "ri"),
-    ("colorado", "co"),
-    ("minnesota", "mn"),
-    ("south carolina", "sc"),
-    ("connecticut", "ct"),
-    ("mississippi", "ms"),
-    ("south dakota", "sd"),
-    ("delaware", "de"),
-    ("missouri", "mo"),
-    ("tennessee", "tn"),
-    ("district of columbia", "dc"),
-    ("montana", "mt"),
-    ("texas", "tx"),
-    ("florida", "fl"),
-    ("nebraska", "ne"),
-    ("trust territories", "tt"),
-    ("georgia", "ga"),
-    ("nevada", "nv"),
-    ("utah", "ut"),
-    ("guam", "gu"),
-    ("new hampshire", "nh"),
-    ("vermont", "vt"),
-    ("hawaii", "hi"),
-    ("new jersey", "nj"),
-    ("virginia", "va"),
-    ("idaho", "id"),
-    ("new mexico", "nm"),
-    ("virgin islands", "vi"),
-    ("illinois", "il"),
-    ("new york", "ny"),
-    ("washington", "wa"),
-    ("indiana", "in"),
-    ("north carolina", "nc"),
-    ("west virginia", "wv"),
-    ("iowa", "ia"),
-    ("north dakota", "nd"),
-    ("wisconsin", "wi"),
-    ("kansas", "ks"),
-    ("northern mariana islands", "mp"),
-    ("wyoming", "wy"),
-]
-
-_FULL2ABBR_MAP = {full: abbr for full, abbr in _US_STATE_TUPLES}
-_ABBR2FULL_MAP = {abbr: full for full, abbr in _US_STATE_TUPLES}
-
-
-def full2abbr(full):
-    res = _FULL2ABBR_MAP.get(full.lower())
-    return res.upper()
-
-
-def abbr2full(abbr): return _ABBR2FULL_MAP.get(abbr.lower())
 
 
 # this is for osm geocoder api
@@ -124,57 +55,20 @@ class UsAddressParser:
     """
     Parse addresses into component parts
     """
-    _fp = 'lib/data/country_subcountry_city.csv'
-    _city_col = 'name'
-    _country_col = 'country'
-    _country_code_col = 'country_code'
-    _state_col = 'subcountry'
-    _geonameid = '_geonameid'
-    _df = pd.read_csv(_fp)
-    _df.fillna('', inplace=True)
-
-    countries = _df[_country_col].unique()
-
-    all_cities = _df[_city_col].unique()
-    us_cities = _df.loc[_df[_country_code_col] == 'USA'][_city_col]
-    # non_us_cities = _df.loc[_df[_country_code_col] != 'USA'][_city_col]
-
-    states_us_full = [full for full, abbr in _US_STATE_TUPLES]
-    states_us_abbr = [abbr for full, abbr in _US_STATE_TUPLES]
-    # states_non_us = _df.loc[_df[_country_code_col] != 'USA'].to_list()
-
-    # def _make_regex(list_of_strings) -> re.Pattern:
-    #     return re.compile(
-    #         r'\b(' + r'|'.join(list_of_strings) + r')\b',
-    #         re.IGNORECASE
-    #     )
-    # US_CITY_REGEX = _make_regex(us_cities)
-
     US_CITY_REGEX = re.compile(
-        r'\b(' + r'|'.join(us_cities) + r')\b',
+        r'\b(' + r'|'.join(US_CITIES) + r')\b',
         re.IGNORECASE
     )
 
-    # TODO make per country/state
-    # NON_US_CITY_REGEX = re.compile(
-    #     r'\b(' + r'|'.join(non_us_cities) + r')\b',
-    #     re.IGNORECASE
-    # )
-
     FULL_US_STATE_REGEX = re.compile(
-        r'\b(' + r'|'.join(states_us_full) + r')\b',
+        r'\b(' + r'|'.join(STATES_FULL) + r')\b',
         re.IGNORECASE
     )
 
     ABBR_US_STATE_REGEX = re.compile(
-        r'\s+(' + '|'.join(states_us_abbr) + r')\s+',
+        r'\s+(' + '|'.join(STATES_ABBR) + r')\s+',
         re.IGNORECASE
     )
-
-    # NON_US_STATE_REGEX = re.compile(
-    #     r'\s+(' + '|'.join(states_non_us) + r')\s+',
-    #     re.IGNORECASE
-    # )
 
     @classmethod
     def _parse_name(cls, address) -> Optional[str]:
@@ -200,14 +94,13 @@ class UsAddressParser:
 
     @classmethod
     def _parse_city(cls, address) -> Optional[str]:
-        mat = cls.US_CITY_REGEX.search(address)
+        res = re.split(_REVERSE_ZIP_REGEX, address[::-1], maxsplit=1)
+        right = res[-1]
+        remainder = right[::-1]
+        mat = cls.US_CITY_REGEX.findall(remainder)
         if mat:
-            return mat.group().strip()
+            return mat[-1]
         return None
-
-    # @classmethod
-    # def parse_country(cls, address) -> Optional[str]:
-    #     raise NotImplementedError()
 
     @classmethod
     def _parse_state(cls, address) -> Optional[str]:
@@ -244,24 +137,29 @@ class UsAddressParser:
 
     @classmethod
     def _parse_state_abbr(cls, addr) -> Optional[str]:
-        mat = re.search(cls.ABBR_US_STATE_REGEX, addr)
+        mat = re.findall(cls.ABBR_US_STATE_REGEX, addr)
         if mat:
-            return mat[0].strip()
+            return mat[-1].strip()
         return None
 
     @classmethod
     def parse(cls, _input) -> UsAddress:
         output = UsAddress(_input)
         output.zip = cls._parse_zip(_input)
-        output.state = cls._parse_state(_input)
-        output.city = cls._parse_city(_input)
+
+        if output.zip is None:
+            output.state = cls._parse_state(_input)
+            output.city = cls._parse_city(_input)
+        else:
+            output.state = zip2state(output.zip)
+            output.city = zip2city(output.zip)
+
         output.street = cls._parse_street(_input)
         output.name = cls._parse_name(_input)
         return output
 
 
 if __name__ == '__main__':
-    import pandas as pd
     fp = '~/Public/Datasets/offshore-leaks-db/nodes-addresses.csv'
     df = pd.read_csv(fp)
     df.fillna('', inplace=True)

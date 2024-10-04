@@ -4,8 +4,46 @@ import pandas as pd
 
 
 _SPACE_REGEX = re.compile(r'\s\s+')
-
 _REMOVE_TO_CLEAN_REGEX = re.compile(r'[^a-z0-9 ]')
+
+
+class DataLoaders:
+    class GIS:
+        def zipcodes():
+            return pd.read_csv('~/Public/Datasets/GIS/zipcodes.csv')
+
+        def world_cities():
+            return pd.read_csv('~/Public/Datasets/GIS/world-cities.csv')
+
+        def country_info():
+            return pd.read_csv('~/Public/Datasets/GIS/country_information.csv')
+
+    class OffshoreLeaks:
+        base = '~/Public/Datasets/offshore-leaks-db/'
+
+        @classmethod
+        def entities(cls):
+            return pd.read_csv(cls.base + 'nodes-entities.csv')
+
+        @classmethod
+        def addresses(cls):
+            return pd.read_csv(cls.base + 'nodes-addresses.csv')
+
+        @classmethod
+        def officers(cls):
+            return pd.read_csv(cls.base + 'nodes-officers.csv')
+
+        @classmethod
+        def others(cls):
+            return pd.read_csv(cls.base + 'nodes-others.csv')
+
+        @classmethod
+        def itermediaries(cls):
+            return pd.read_csv(cls.base + 'nodes-intermediaries.csv')
+
+        @classmethod
+        def relationships(cls):
+            return pd.read_csv(cls.base + 'relationships.csv')
 
 
 def safe_clean_string(s):
