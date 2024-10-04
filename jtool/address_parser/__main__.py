@@ -19,6 +19,7 @@ _STREET_TERM_REGEX = re.compile(
     r'.*(\b|\d+)(street|avenue|boulevard|highway|st|ave?|blvd|court|ct|lane|ln|place|plaza|pl|way|road|rd|terrace|terr|expressway|run|drive|dr|circle|cir)[\.,]?\b',
     re.IGNORECASE
 )
+_STREET_2_REGEX = re.compile(r'(apt\.?|suite|\#)( ?\#?\d+)', re.IGNORECASE)
 
 
 # this is for osm geocoder api
@@ -28,6 +29,7 @@ class UsAddress:
         _input: str,
         name: Optional[str] = None,
         street: Optional[str] = None,
+        street_two: Optional[str] = None,
         city: Optional[str] = None,
         state: Optional[str] = None,
         zip: Optional[str] = None,
@@ -35,6 +37,7 @@ class UsAddress:
         self._input = _input
         self.name = name
         self.street = street
+        self.street_two = street_two
         self.city = city
         self.state = state
         self.zip = zip
@@ -88,6 +91,13 @@ class UsAddressParser:
         # get rid of name
         stripped = _NAME_REGEX.sub('', address).strip()
         mat = _STREET_TERM_REGEX.match(stripped)
+        if mat:
+            return mat.group()
+        return None
+
+    @classmethod
+    def _parse_street_two(cls, address: str) -> Optional[str]:
+        mat = _STREET_2_REGEX.search(address)
         if mat:
             return mat.group()
         return None
@@ -155,6 +165,7 @@ class UsAddressParser:
             output.city = zip2city(output.zip)
 
         output.street = cls._parse_street(_input)
+        output.street_two = cls._parse_street_two(_input)
         output.name = cls._parse_name(_input)
         return output
 
