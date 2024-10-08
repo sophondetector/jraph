@@ -113,28 +113,3 @@ if __name__ == '__main__':
         except Exception as e:
             print('ERROR', e)
             write_json(f'nom_out/ERROR_{idx}.json', {'error': str(e)})
-
-# if __name__ == '__main__':
-    # skip_me = "Portcullis TrustNet Chambers P.O. Box 3444 Road Town, Tortola BRITISH VIRGIN ISLANDS"
-    # print('starting nominatim requests...')
-    # seen_addrs = set()
-    # for nid, addr in gen_rows():
-    #     if not addr:
-    #         continue
-    #     if addr in seen_addrs:
-    #         continue
-    #     if skip_me in addr:
-    #         continue
-    #     seen_addrs.add(addr)
-    #     fn = f'nom_out/{nid}.json'
-    #     try:
-    #         j_resp = get_geojson(addr)
-    #         feats = j_resp.get('features', [])
-    #         if len(feats) > 0:
-    #             write_json(fn, j_resp)
-    #     except Exception as e:
-    #         print('ERROR', e)
-    #         write_json(f'nom_out/ERROR_{nid}.json', {'error': str(e)})
-    #
-    # print('finished nominatim')
-    # print()
