@@ -16,7 +16,7 @@ _NAME_REGEX = re.compile(r'^[^\d]+')
 _PO_BOX_REGEX_NO_NUM = re.compile(r'p\.?o\.?\s+box', re.IGNORECASE)
 _PO_BOX_REGEX = re.compile(r'p\.?o\.?\s+box\s+[a-z\-]*\d+', re.IGNORECASE)
 _STREET_TERM_REGEX = re.compile(
-    r'.*(\b|\d+)(street|avenue|boulevard|highway|st|ave?|blvd|court|ct|lane|ln|place|plaza|pl|way|road|rd|terrace|terr|expressway|run|drive|dr|circle|cir|pike)[\.,]?\b',
+    r'.*(\b|\d+)(street|avenue|boulevard|highway|hway|st|ave?|blvd|court|ct|lane|ln|place|plaza|pl|way|road|rd|terrace|terr|expressway|run|drive|dr|circle|cir|pike)[\.,]?\b',
     re.IGNORECASE
 )
 _STREET_2_REGEX = re.compile(r'(apt\.?|suite|\#)( ?\#?\d+)', re.IGNORECASE)
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     df = pd.read_csv(fp)
     df.fillna('', inplace=True)
     df = df[df.apply(lambda r: 'USA' in r.country_codes, axis=1)]
-    stop = 2000
+    stop = 100
     for idx, (nid, row) in enumerate(df.iterrows()):
         if idx == stop:
             break
