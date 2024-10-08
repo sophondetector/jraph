@@ -1,5 +1,3 @@
-from typing import Union
-import json
 
 _US_STATE_TUPLES = [
     ("alabama", "al"),
@@ -64,7 +62,6 @@ _US_STATE_TUPLES = [
 STATES_FULL = list(map(lambda t: t[0], _US_STATE_TUPLES))
 STATES_ABBR = list(map(lambda t: t[1], _US_STATE_TUPLES))
 
-
 _FULL2ABBR_MAP = {full: abbr for full, abbr in _US_STATE_TUPLES}
 _ABBR2FULL_MAP = {abbr: full for full, abbr in _US_STATE_TUPLES}
 
@@ -81,37 +78,3 @@ def abbr2full(abbr: str, title_case: bool = True) -> str:
     if title_case:
         return res.title()
     return res
-
-
-_ZIP2CITY_MAP = None
-_ZIP2STATE_MAP = None
-
-
-def _load_zip2city() -> dict:
-    global _ZIP2CITY_MAP
-    if _ZIP2CITY_MAP is None:
-        with open('lib/data/zip2city.json') as fh:
-            _ZIP2CITY_MAP = json.load(fh)
-    return _ZIP2CITY_MAP
-
-
-def _load_zip2state() -> dict:
-    global _ZIP2STATE_MAP
-    if _ZIP2STATE_MAP is None:
-        with open('lib/data/zip2state.json') as fh:
-            _ZIP2STATE_MAP = json.load(fh)
-    return _ZIP2STATE_MAP
-
-
-def zip2city(zip: Union[str, int]) -> str:
-    if type(zip) is int:
-        zip = str(zip)
-    zip = zip[:5]
-    return _load_zip2city().get(zip)
-
-
-def zip2state(zip: Union[str, int]) -> str:
-    if type(zip) is int:
-        zip = str(zip)
-    zip = zip[:5]
-    return _load_zip2state().get(zip)
