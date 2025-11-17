@@ -1,24 +1,59 @@
-from typing import Optional, List, Union
+from typing import Iterable, Optional, List, Union
+from io import BytesIO
 
+from shapely.geometry import Point
+import geopandas as gpd
 import simplekml as sk
+import pandas as pd
 
+from .dbc import query_n_nearest_nodes, query_node, query_node_edges
 from .classes import Node, Edge
-from .dbc import query_node, query_node_edges
 
 
-_DEFAULT_LAT: float = 43.0
-_DEFAULT_LONG: float = -122.0
 _DEFAULT_NAME = 'JRAPH NODE'
 
 
 class Jraph:
     def __init__(
-        self, nodes: Optional[List[Node]] = None,
+        self,
+        nodes: Optional[List[Node]] = None,
         edges: Optional[List[Edge]] = None
     ):
         self.nodes = nodes if nodes is not None else []
         self.edges = edges if edges is not None else []
         self.name_inc = 0
+
+    def j2q(self) -> BytesIO:
+        """
+        Export geographic points with attributes to a GeoPackage file for QGIS.
+        """
+
+        # Prepare data for GeoDataFrame
+        records = []
+        geometries = []
+
+        for node in self.nodes:
+            lon, lat = node.get_coords()
+            point = Point(lon, lat)
+            geometries.append(point)
+            record = {'node_id': node.node_id}
+            features = node.properties['features'][0]
+            geocoding = features['properties']['geocoding']
+            for key, value in geocoding.items():
+                record[key] = value
+            records.append(record)
+
+        # Create DataFrame from records
+        df = pd.DataFrame(records)
+
+        # Create GeoDataFrame
+        gdf = gpd.GeoDataFrame(df, geometry=geometries, crs="EPSG:4326")
+
+        # Export to GeoPackage
+        res = BytesIO()
+        gdf.to_file(res, driver="GPKG")
+
+        return res
 
     def j2k(self, kml: Optional[sk.Kml] = None) -> sk.Kml:
         if kml is None:
@@ -39,7 +74,7 @@ class Jraph:
 
         return kml
 
-    def get_jraph_node(self, node_id) -> Optional[Node]:
+    def get_jraph_node(self, node_id: int) -> Optional[Node]:
         for node in self.nodes:
             if node.node_id == node_id:
                 return node
@@ -56,16 +91,17 @@ class Jraph:
         self.edges = []
 
     def get_coords(self, node: Node) -> tuple[float, float]:
-        return (
-            node.properties.get('long', _DEFAULT_LONG),
-            node.properties.get('lat', _DEFAULT_LAT),
-        )
+        return node.get_coords()
 
     def get_name(self, node: Node) -> str:
-        name = node.properties.get('name')
+        feature: dict = node.properties['features'][0]
+        geocoding: dict = feature['properties']['geocoding']
+        name = geocoding.get("name")
         if name is None:
-            name = _DEFAULT_NAME + ' ' + str(self.name_inc)
-            self.name_inc += 1
+            name = geocoding.get("label")
+            if name is None:
+                name = _DEFAULT_NAME + ' ' + str(self.name_inc)
+                self.name_inc += 1
         return name
 
     def add_node(self, node: Node) -> None:
@@ -86,8 +122,8 @@ class Jraph:
 
     def add(
         self,
-        nodes: Optional[Union[Node, List[Node]]] = None,
-        edges: Optional[Union[Edge, List[Edge]]] = None,
+        nodes: Optional[Union[Node, Iterable[Node]]] = None,
+        edges: Optional[Union[Edge, Iterable[Edge]]] = None,
     ) -> None:
         if nodes is not None:
             if type(nodes) is Node:
@@ -103,9 +139,15 @@ class Jraph:
 
 
 if __name__ == '__main__':
+    lat = -118.423581
+    long = 34.0573375
+    print('query_n_nearest_nodes test')
+    res = query_n_nearest_nodes(lat, long, 20)
+    print(res)
+
     outpath = 'jraph-test-output.kml'
     jraph = Jraph()
-    for nid in [1, 2, 3]:
+    for nid in [262892, 262897, 262988]:
         node = query_node(nid)
         edges = query_node_edges(nid)
         jraph.add(node, edges)
@@ -113,4 +155,3 @@ if __name__ == '__main__':
     print('saving kml to {}...'.format(outpath), end='')
     kml.save(outpath)
     print('success')
-    print('finito')

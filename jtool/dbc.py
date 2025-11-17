@@ -1,111 +1,143 @@
 import os
 import json
-import pyodbc
+
+import psycopg
+from dotenv import load_dotenv
 from typing import Optional, Union, List, Tuple
 
 from .utils import nan2none
 from .classes import Node, Edge
 
+load_dotenv()
+
 _CONN = None
+_DB_HOST_VAR = "DB_HOST"
+_DB_USER_VAR = "DB_USER"
+# _DB_PASSWORD_VAR = "DB_PASSWORD"
 
-# cat /etc/odbcinst.ini to find correct val for DRIVER for Sql Server
-_DB_DRIVER = '/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.4.so.1.1'
-_JRAPH_DB = 'jraph'
-_JRAPH_HOST = 'localhost'
-_JRAPH_USER = 'sa'
+_DB_NAME = "offshore_leaks"
+_DB_USER = os.getenv(_DB_USER_VAR)
+
+# TODO Password protect the database!!
+# def _get_pass():
+#     pw = os.getenv(_DB_PASSWORD_VAR)
+#     if not pw:
+#         print(f"{_DB_PASSWORD_VAR} required in env!")
+#         exit(1)
+#     if pw[0] == '"' and pw[-1] == '"':
+#         return pw[1:-1]
+#     return pw
 
 
-def _get_pass():
-    pw = os.getenv("JRAPH_SA_PASSWORD")
-    if not pw:
-        print("JRAPH_SA_PASSWORD required in env!")
+def _get_host():
+    host = os.getenv(_DB_HOST_VAR)
+    if not host:
+        print(f"{_DB_HOST_VAR} required in env!")
         exit(1)
-
-    if pw[0] == '"' and pw[-1] == '"':
-        return pw[1:-1]
-
-    return pw
+    if host[0] == '"' and host[-1] == '"':
+        return host[1:-1]
+    return host
 
 
-def get_conn() -> pyodbc.Connection:
+def get_conn() -> psycopg.Connection:
     global _CONN
+    host = _get_host()
+    conn_str = f"host={host} dbname={_DB_NAME} user={_DB_USER}"
     if _CONN is None:
-        print(f"connecting to {_JRAPH_DB}...", end='')
-        cstring = 'DRIVER={};SERVER={};UID={};PWD={};DATABASE={}'.format(
-            _DB_DRIVER, _JRAPH_HOST, _JRAPH_USER, _get_pass(), _JRAPH_DB)
-        cstring += ';TrustServerCertificate=yes'
-        _CONN = pyodbc.connect(cstring)
+        print("connecting to database...", end='')
+        _CONN = psycopg.connect(conn_str)
         print("done")
     return _CONN
 
 
-def get_cur() -> pyodbc.Cursor:
+def get_cur() -> psycopg.Cursor:
     return get_conn().cursor()
 
 
-def _row2node(row: Tuple[int, str]) -> Node:
-    node_id, prop_raw = row
-    props = json.loads(prop_raw)
-    return Node(node_id, props)
+def _row2node(row: Tuple[int, dict]) -> Node:
+    node_id, props = row
+    long, lat = props['features'][0]['geometry']['coordinates']
+    return Node(node_id, long=long, lat=lat, properties=props)
 
 
-def _row2edge(row: Tuple[int, int, int, str]) -> Edge:
-    eid, sid, tid, prop_str = row
+def _row2edge(row: Tuple[int, int, int, dict]) -> Edge:
+    edge_id, source_id, target_id, props = row
+    return Edge(edge_id, source_id, target_id, props)
 
 
-def query_node(node_id: int) -> Node:
+def query_node(node_id: int) -> Optional[Node]:
     with get_cur() as cur:
-        cur.execute("SELECT * FROM node WHERE node_id=?;", node_id)
+        cur.execute(
+            "SELECT * FROM geocoded_addresses WHERE node_id=%s;", (node_id,))
         row = cur.fetchone()
     if row is None:
         return None
     return _row2node(row)
 
 
-def query_edge_source(source_id) -> List[Edge]:
+def query_n_nearest_nodes(lat: float, long: float, n: int = 10) -> List[int]:
     with get_cur() as cur:
-        cur.execute("SELECT * FROM edge WHERE source_id=?;", source_id)
-        res = []
-        seen = set()
-        for row in cur.fetchall():
-            edge_id = row[0]
-            if edge_id in seen:
-                continue
-            seen.add(edge_id)
-            source_id = row[1]
-            target_id = row[2]
-            props = json.loads(row[3])
-            res.append(Edge(edge_id, source_id, target_id, props))
-    return res
+        cur.execute(
+            """SELECT node_id FROM node_points
+            ORDER BY coord <-> POINT (%s, %s)
+            LIMIT %s
+            """,
+            (long, lat, n)
+        )
+        return [nid for (nid,) in cur.fetchall()]
 
 
-def query_edge_target(target_id) -> List[Edge]:
+def query_edge_source(source_id: int) -> List[Edge]:
     with get_cur() as cur:
-        cur.execute("SELECT * FROM edge WHERE target_id=?;", target_id)
-        res = []
-        seen = set()
-        for row in cur.fetchall():
-            edge_id = row[0]
-            if edge_id in seen:
-                continue
-            seen.add(edge_id)
-            source_id = row[1]
-            target_id = row[2]
-            props = json.loads(row[3])
-            res.append(Edge(edge_id, source_id, target_id, props))
-    return res
+        cur.execute(
+            """SELECT edge_id, _start, _end, link
+            FROM relationships WHERE _start=%s;""",
+            (source_id,)
+        )
+        return [_row2edge(row) for row in cur.fetchall()]
 
 
-def query_node_edges(node_id) -> List[Edge]:
-    res = query_edge_source(node_id)
-    res.extend(query_edge_target(node_id))
-    return res
+def query_edge_target(target_id: int) -> List[Edge]:
+    with get_cur() as cur:
+        cur.execute(
+            """SELECT edge_id, _start, _end, link
+            FROM relationships WHERE _end=%s;""",
+            (target_id,)
+        )
+        return [_row2edge(row) for row in cur.fetchall()]
+
+
+def query_node_edges(node_id: int) -> List[Edge]:
+    with get_cur() as cur:
+        cur.execute(
+            """SELECT edge_id, _start, _end, link
+            FROM relationships
+            WHERE _start=%s OR _end=%s;""",
+            (node_id, node_id)
+        )
+        return [_row2edge(row) for row in cur.fetchall()]
+
+
+def query_many_node_edges(node_id_arr: List[int]) -> List[Edge]:
+    with get_cur() as cur:
+        # TODO way to ensure unique in SQL?
+        cur.execute(
+            """
+            SELECT edge_id, _start, _end, link
+            FROM relationships
+            WHERE _start = ANY(%s)
+            AND _end   = ANY(%s);
+            """,
+            (node_id_arr, node_id_arr)
+        )
+
+        return [_row2edge(row) for row in cur.fetchall()]
 
 
 def insert_node(
         nid,
         props: Optional[Union[dict, str]] = None,
-        cur: Optional[pyodbc.Cursor] = None):
+        cur: Optional[psycopg.Cursor] = None):
 
     if cur is None:
         cur = get_cur()
@@ -117,16 +149,16 @@ def insert_node(
 
     with cur:
         cur.execute('SET IDENTITY_INSERT node ON;')
-        cur.execute("INSERT node (node_id, properties) VALUES (?, ?)",
-                    nid, props)
-        cur.commit()
+        cur.execute("INSERT node (node_id, properties) VALUES (%s, %s)",
+                    (nid, props))
+        get_conn().commit()
 
 
 def insert_edge(
         source_id: int,
         target_id: int,
         props: Optional[Union[dict, str]] = None,
-        cur: Optional[pyodbc.Cursor] = None):
+        cur: Optional[psycopg.Cursor] = None):
 
     if cur is None:
         cur = get_cur()
@@ -141,58 +173,20 @@ def insert_edge(
 
     with cur:
         cur.execute(
-            "INSERT edge (source_id, target_id, properties) VALUES (?, ?, ?)",
-            source_id, target_id, props)
-        cur.commit()
+            """INSERT edge (source_id, target_id, properties)
+            VALUES (%s, %s, %s)""",
+            (source_id, target_id, props))
+        get_conn().commit()
 
 
-def set_node_prop(node_id: int, key: str, value) -> None:
+def query_node_prop(value: str) -> List[Node]:
+    # TODO secure this!
     sql = """
-    UPDATE node
-    SET properties = json_modify(properties, '$.{}', ?)
-    WHERE node_id = ?;
-    """.format(key)
-    with get_cur() as cur:
-        cur.execute(sql, value, node_id)
-        cur.execute(sql, value, node_id)
-        cur.commit()
-        # can check success via cur.rowcount
-
-
-def set_edge_prop(edge_id: int, key: str, value) -> None:
-    sql = """
-    UPDATE edge
-    SET properties = json_modify(properties, '$.{}', ?)
-    WHERE edge_id = ?;
-    """.format(key)
-    with get_cur() as cur:
-        cur.execute(sql, value, edge_id)
-        cur.execute(sql, value, edge_id)
-        cur.commit()
-        # can check success via cur.rowcount
-
-
-def query_node_prop(key: str, value) -> List[Node]:
-    sql = """
-    SELECT * FROM node WHERE json_value(properties, '$.{}') LIKE '%{}%';
-    """.format(key, value)
+    SELECT node_id, geocoded_address
+    FROM geocoded_addresses
+    WHERE geocoded_address->'features'->0->'properties'->>'geocoding'
+    LIKE '%{}%';
+    """.format(value)
     with get_cur() as cur:
         cur.execute(sql)
-        rows = cur.fetchall()
-    out = []
-    for r in rows:
-        out.append(_row2node(r))
-    return out
-
-
-def query_edge_prop(key: str, value) -> List[Node]:
-    sql = """
-    SELECT * FROM edge WHERE json_value(properties, '$.{}') LIKE '%{}%';
-    """.format(key, value)
-    with get_cur() as cur:
-        cur.execute(sql)
-        rows = cur.fetchall()
-    out = []
-    for r in rows:
-        out.append(_row2node(r))
-    return out
+        return [_row2node(r) for r in cur.fetchall()]

@@ -1,10 +1,6 @@
 * {
 	font-family: serif;
-}
-
-body>* {
-	margin-top: 1rem;
-	margin-left: 1rem;
+  font-size: 1.2rem;
 }
 
 main {
@@ -16,11 +12,15 @@ main>* {
 	margin: 5px
 }
 
-pre {
+#kml-display {
 	font-family: monospace;
 	height: 300px;
-	max-width: 70ch;
+	width: 50ch;
 	overflow: scroll;
+}
+
+#control-panel>form>* {
+  margin-bottom: 1rem;
 }
 
 #prev {
@@ -30,4 +30,5 @@ pre {
 #map {
 	width: 900px;
 	height: 800px;
+  margin: auto
 }

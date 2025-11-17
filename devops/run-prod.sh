@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-DEPLOY_ENV="prod"
-ENV_FILE=.env
 EXTRA_FILES_ARR=(
 	templates/index.html
 	static/style.css
@@ -15,8 +13,7 @@ RUN_DIR=/root/jraph
 
 cd $RUN_DIR
 
-flask --env-file $ENV_FILE run \
-	--debug \
-	--extra-files $EXTRA_FILES \
+flask run \
+	--extra-files "$EXTRA_FILES" \
 	--port $PORT \
 	--host $HOST

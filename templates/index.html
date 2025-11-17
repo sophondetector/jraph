@@ -2,219 +2,135 @@
 <html>
 
 <head>
-	<title>Jraph Form</title>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-		integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-	<link rel="stylesheet" href="static/style.css">
-	<script src="static/togeojson.js"></script>
-	<script src="static/leaflet.filelayer.js"></script>
-	<!-- <meta http-equiv="refresh" content="3"> -->
+  <title>Jraph Form</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="static/style.css">
+  <script src="static/togeojson.js"></script>
+  <script src="static/leaflet.filelayer.js"></script>
+  <!-- <meta http-equiv="refresh" content="3"> -->
 </head>
 
 <body>
 
-	<header>
-		<h1> Jraph KML Creation Tool </h1>
-	</header>
+  <header>
+    <h1> Jraph KML Creation Tool </h1>
+  </header>
 
-	<main>
-		<div>
-			<form action="/" method="POST" id="query-form">
-				<button type="submit">submit</button>
-				<table>
-					<tr>
-						<td><label for="name">node_id</label></td>
-						<td><input type="text" name="node_id" id="node_id"></td>
-					</tr>
+  <main>
+    <div>
 
-					<tr>
-						<td><label for="name">name</label></td>
-						<td><input type="text" name="name" id="name"></td>
-					</tr>
+      <div id="control-panel">
 
-					<tr>
-						<td><label for="name">type</label></td>
-						<td><input type="text" name="type" id="type"></td>
-					</tr>
+        <form action="/" method="POST" id="query-form">
+          <label for="search">Search</label>
+          <input type="text" name="search" id="search">
+          <button type="submit">Submit</button>
+        </form>
 
-					<tr>
-						<td><label for="name">age</label></td>
-						<td><input type="text" name="age" id="age"></td>
-					</tr>
+      </div>
 
-					<tr>
-						<td><label for="name">lat</label></td>
-						<td><input type="text" name="lat" id="lat"></td>
-					</tr>
+      <div>
+        <h3>Output</h3>
+        <a href="/download">Download KML</a>
+        <a href="/download-gpkg">Download GPKG</a>
 
-					<tr>
-						<td><label for="name">long</label></td>
-						<td><input type="text" name="long" id="long"></td>
-					</tr>
+        <h4>Kml Preview</h4>
+        <pre id="kml-display"></pre>
 
-					<tr>
-						<td><label for="name">address</label></td>
-						<td><input type="text" name="address" id="address"></td>
-					</tr>
+        <h3>Previous Queries</h3>
+        <ol id="prev">
+        </ol>
+        <br>
+      </div>
+    </div>
 
-					<tr>
-						<td><label for="name">_id</label></td>
-						<td><input type="text" name="_id" id="_id"></td>
-					</tr>
+    <div id="map"></div>
 
-					<tr>
-						<td><label for="name">original_name</label></td>
-						<td><input type="text" name="original_name" id="original_name"></td>
-					</tr>
+    <script>
 
-					<tr>
-						<td><label for="name">former_name</label></td>
-						<td><input type="text" name="former_name" id="former_name"></td>
-					</tr>
+      const map = L.map('map').setView([43.206879, -71.538162], 13);
 
-					<tr>
-						<td><label for="name">jurisdiction</label></td>
-						<td><input type="text" name="jurisdiction" id="jurisdiction"></td>
-					</tr>
+      const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
 
-					<tr>
-						<td><label for="name">jurisdiction_description</label></td>
-						<td><input type="text" name="jurisdiction_description" id="jurisdiction_description"></td>
-					</tr>
+      const control = L.Control.fileLayerLoad({
+        layer: L.geoJson,
+        layerOptions: {style: {color: 'red'}},
+        addToMap: true,
+        fileSizeLimit: 1024,
+        formats: [
+          '.geojson',
+          '.kml',
+        ]
+      }).addTo(map);
 
-					<tr>
-						<td><label for="name">company_type</label></td>
-						<td><input type="text" name="company_type" id="company_type"></td>
-					</tr>
+      control.loader.on('data:error', function (error) {
+        console.log('ERROR', error);
+      });
+      // === NEW: Auto-load KML after form submission ===
+      let currentLayer = null; // To remove previous results
 
-					<tr>
-						<td><label for="name">internal_id</label></td>
-						<td><input type="text" name="internal_id" id="internal_id"></td>
-					</tr>
+      document.getElementById('query-form').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Prevent full page reload
 
-					<tr>
-						<td><label for="name">incorporation_date</label></td>
-						<td><input type="text" name="incorporation_date" id="incorporation_date"></td>
-					</tr>
+        const formData = new FormData(this);
 
-					<tr>
-						<td><label for="name">inactivation_date</label></td>
-						<td><input type="text" name="inactivation_date" id="inactivation_date"></td>
-					</tr>
+        try {
+          // Step 1: Submit query to Flask backend
+          const response = await fetch('/', {
+            method: 'POST',
+            body: formData
+          });
 
-					<tr>
-						<td><label for="name">struck_off_date</label></td>
-						<td><input type="text" name="struck_off_date" id="struck_off_date"></td>
-					</tr>
+          if (!response.ok) throw new Error('Query failed');
 
-					<tr>
-						<td><label for="name">dorm_date</label></td>
-						<td><input type="text" name="dorm_date" id="dorm_date"></td>
-					</tr>
+          respJson = await response.json()
+          kmlText = respJson.kml
+          document.getElementById('kml-display').textContent = kmlText
+          prevEntry = document.createElement('li')
+          prevEntry.textContent = respJson.previousQuery
+          document.getElementById('prev').appendChild(prevEntry)
 
-					<tr>
-						<td><label for="name">status</label></td>
-						<td><input type="text" name="status" id="status"></td>
-					</tr>
+          // Step 2: Parse KML to GeoJSON using togeojson
+          const kmlDoc = new DOMParser().parseFromString(kmlText, 'text/xml');
+          const geojson = toGeoJSON.kml(kmlDoc);
 
-					<tr>
-						<td><label for="name">service_provider</label></td>
-						<td><input type="text" name="service_provider" id="service_provider"></td>
-					</tr>
+          // Step 3: Remove previous layer
+          if (currentLayer) {
+            map.removeLayer(currentLayer);
+          }
 
-					<tr>
-						<td><label for="name">ibcRUC</label></td>
-						<td><input type="text" name="ibcRUC" id="ibcRUC"></td>
-					</tr>
+          // Step 4: Add new GeoJSON layer
+          currentLayer = L.geoJSON(geojson, {
+            style: {color: 'blue', weight: 4},
+            onEachFeature: function (feature, layer) {
+              if (feature.properties && feature.properties.name) {
+                layer.bindPopup(feature.properties.name);
+              }
+            }
+          }).addTo(map);
 
-					<tr>
-						<td><label for="name">country_codes</label></td>
-						<td><input type="text" name="country_codes" id="country_codes"></td>
-					</tr>
+          // Step 5: Fit map to bounds
+          if (geojson.features.length > 0) {
+            map.fitBounds(currentLayer.getBounds());
+          } else {
+            alert('No features found for this query.');
+          }
 
-					<tr>
-						<td><label for="name">countries</label></td>
-						<td><input type="text" name="countries" id="countries"></td>
-					</tr>
+        } catch (err) {
+          console.error(err);
+          alert('Error: ' + err.message);
+        }
+      });
 
-					<tr>
-						<td><label for="name">sourceID</label></td>
-						<td><input type="text" name="sourceID" id="sourceID"></td>
-					</tr>
+    </script>
 
-					<tr>
-						<td><label for="name">valid_until</label></td>
-						<td><input type="text" name="valid_until" id="valid_until"></td>
-					</tr>
-
-					<tr>
-						<td><label for="name">note</label></td>
-						<td><input type="text" name="note" id="note"></td>
-					</tr>
-
-					<tr>
-						<td><label for="name">zip</label></td>
-						<td><input type="text" name="zip" id="zip"></td>
-					</tr>
-
-					<tr>
-						<td><label for="name">zip_five</label></td>
-						<td><input type="text" name="zip_five" id="zip_five"></td>
-					</tr>
-
-					<tr>
-						<td><label for="name">state</label></td>
-						<td><input type="text" name="state" id="state"></td>
-					</tr>
-				</table>
-			</form>
-		</div>
-
-		<div>
-			<h3>Output</h3>
-			<a href="/download">Download KML</a>
-			<pre id="kml-display">{{output}}</pre>
-
-			<h3>Previous</h3>
-			<ol id="prev">
-				{% for pq in previous_queries %}
-				<li>{{pq}}</li>
-				{% endfor %}
-			</ol>
-			<br>
-		</div>
-
-		<div id="map"></div>
-
-		<script>
-
-			const map = L.map('map').setView([43.206879, -71.538162], 13);
-
-			const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				maxZoom: 19,
-				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-			}).addTo(map);
-
-			const control = L.Control.fileLayerLoad({
-				layer: L.geoJson,
-				layerOptions: {style: {color: 'red'}},
-				addToMap: true,
-				fileSizeLimit: 1024,
-				formats: [
-					'.geojson',
-					'.kml'
-				]
-			}).addTo(map);
-
-			control.loader.on('data:error', function (error) {
-				console.log('ERROR', error);
-			});
-
-		</script>
-
-	</main>
+  </main>
 
 </body>
 
