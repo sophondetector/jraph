@@ -1,12 +1,11 @@
 import io
-import time
 
 from typing import Optional
 
 from flask import Flask, request, render_template, send_file, abort, jsonify
 
 from jtool.jraph import Jraph
-from jtool.dbc import query_many_node_edges, query_node_prop
+from jtool.dbc import query_many_node_edges, query_node_prop, query_nodes_within_radius, check_for_sql_injection
 
 
 app = Flask("jraph")
@@ -14,6 +13,28 @@ app = Flask("jraph")
 # TODO change so there are session objects
 LAST_JRAPH: Optional[Jraph] = None
 PREVIOUS_QUERIES = []
+
+
+@app.route("/nodes-within-radius", methods=["POST"])
+def nodes_within_radius():
+    global LAST_JRAPH, PREVIOUS_QUERIES
+    lat = request.form.get("lat", type=float)
+    lng = request.form.get("lng", type=float)
+    r_meters = request.form.get("rad", type=float)
+
+    if lat is None or lng is None or r_meters is None:
+        return abort(500, 'nodes-within-radius: missing parameters')
+
+    nodes = query_nodes_within_radius(lat, lng, r_meters)
+    # TODO GET EDGES TOO
+
+    LAST_JRAPH = Jraph(nodes)
+    kml = LAST_JRAPH.j2k().kml()
+    PREVIOUS_QUERIES.append(f"lat: {lat}\tlong: {lng}")
+    return jsonify({
+        "previousQuery": PREVIOUS_QUERIES[-1],
+        "kml": kml
+    })
 
 
 @app.route("/download-gpkg", methods=["GET"])
@@ -47,9 +68,8 @@ def index():
         return render_template(
             "index.html", output="none", previous_queries=[])
 
-    start_time = time.time()
-
     search = request.form.get("search")
+
     PREVIOUS_QUERIES.append(search)
     if search is None or len(search) == 0:
         return jsonify({
@@ -57,14 +77,14 @@ def index():
             "kml": None
         })
 
+    if check_for_sql_injection(search):
+        return abort(500, 'something went wrong')
+
     nodes = query_node_prop(search)
     edges = query_many_node_edges([n.node_id for n in nodes])
     jr = Jraph(nodes=nodes, edges=edges)
     kml = jr.j2k().kml()
     LAST_JRAPH = jr
-
-    time_taken = time.time() - start_time
-    print('QUERY TIME: ', time_taken, ' seconds')
 
     return jsonify({
         "previousQuery": PREVIOUS_QUERIES[-1],

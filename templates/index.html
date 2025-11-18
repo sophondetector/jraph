@@ -2,135 +2,193 @@
 <html>
 
 <head>
-  <title>Jraph Form</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <link rel="stylesheet" href="static/style.css">
-  <script src="static/togeojson.js"></script>
-  <script src="static/leaflet.filelayer.js"></script>
-  <!-- <meta http-equiv="refresh" content="3"> -->
+	<title>Jraph Form</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+		integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+	<link rel="stylesheet" href="static/style.css">
+	<script src="static/togeojson.js"></script>
+	<script src="static/leaflet.filelayer.js"></script>
+	<!-- <meta http-equiv="refresh" content="3"> -->
 </head>
 
 <body>
 
-  <header>
-    <h1> Jraph KML Creation Tool </h1>
-  </header>
+	<header>
+		<h1> Jraph Offshore Leaks Database Node Viewer </h1>
+		<span>Draw a circle on the map by alt+click-dragging and see all nodes within that circle or search for a term in
+			the search bar</span>
+	</header>
 
-  <main>
-    <div>
+	<main>
+		<div>
 
-      <div id="control-panel">
+			<div id="control-panel">
 
-        <form action="/" method="POST" id="query-form">
-          <label for="search">Search</label>
-          <input type="text" name="search" id="search">
-          <button type="submit">Submit</button>
-        </form>
+				<form action="/" method="POST" id="query-form">
+					<label for="search">Search</label>
+					<input type="text" name="search" id="search">
+					<button type="submit">Submit</button>
+				</form>
 
-      </div>
+			</div>
 
-      <div>
-        <h3>Output</h3>
-        <a href="/download">Download KML</a>
-        <a href="/download-gpkg">Download GPKG</a>
+			<div>
+				<a href="/download">Download KML</a>
+				<a href="/download-gpkg">Download GPKG</a>
 
-        <h4>Kml Preview</h4>
-        <pre id="kml-display"></pre>
+				<h4>Kml Preview</h4>
+				<pre id="kml-display"></pre>
 
-        <h3>Previous Queries</h3>
-        <ol id="prev">
-        </ol>
-        <br>
-      </div>
-    </div>
+				<h3>Previous Queries</h3>
+				<ol id="prev">
+				</ol>
+				<br>
+			</div>
+		</div>
 
-    <div id="map"></div>
+		<div id="map"></div>
 
-    <script>
+		<script>
+			const DEFAULT_LAT = 43.206879
+			const DEFAULT_LNG = -71.538162
+			const DEFAULT_ZOOM = 7
 
-      const map = L.map('map').setView([43.206879, -71.538162], 13);
+			const map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-      const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }).addTo(map);
+			const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			}).addTo(map);
 
-      const control = L.Control.fileLayerLoad({
-        layer: L.geoJson,
-        layerOptions: {style: {color: 'red'}},
-        addToMap: true,
-        fileSizeLimit: 1024,
-        formats: [
-          '.geojson',
-          '.kml',
-        ]
-      }).addTo(map);
+			const control = L.Control.fileLayerLoad({
+				layer: L.geoJson,
+				layerOptions: {style: {color: 'red'}},
+				addToMap: true,
+				fileSizeLimit: 1024,
+				formats: [
+					'.geojson',
+					'.kml',
+				]
+			}).addTo(map);
 
-      control.loader.on('data:error', function (error) {
-        console.log('ERROR', error);
-      });
-      // === NEW: Auto-load KML after form submission ===
-      let currentLayer = null; // To remove previous results
+			control.loader.on('data:error', function (error) {
+				console.log('ERROR', error);
+			});
+			let currentLayer = null; // To remove previous results
 
-      document.getElementById('query-form').addEventListener('submit', async function (e) {
-        e.preventDefault(); // Prevent full page reload
+			function handleResponse(respJson) {
+				// Auto-load KML into map from server response
 
-        const formData = new FormData(this);
+				// Append previous query to previous query list
+				kmlText = respJson.kml
+				document.getElementById('kml-display').textContent = kmlText
+				prevEntry = document.createElement('li')
+				prevEntry.textContent = respJson.previousQuery
+				document.getElementById('prev').appendChild(prevEntry)
 
-        try {
-          // Step 1: Submit query to Flask backend
-          const response = await fetch('/', {
-            method: 'POST',
-            body: formData
-          });
+				// Step 2: Parse KML to GeoJSON using togeojson
+				const kmlDoc = new DOMParser().parseFromString(kmlText, 'text/xml');
+				const geojson = toGeoJSON.kml(kmlDoc);
 
-          if (!response.ok) throw new Error('Query failed');
+				// Step 3: Remove previous layer
+				if (currentLayer) {
+					map.removeLayer(currentLayer);
+				}
 
-          respJson = await response.json()
-          kmlText = respJson.kml
-          document.getElementById('kml-display').textContent = kmlText
-          prevEntry = document.createElement('li')
-          prevEntry.textContent = respJson.previousQuery
-          document.getElementById('prev').appendChild(prevEntry)
+				// Step 4: Add new GeoJSON layer
+				currentLayer = L.geoJSON(geojson, {
+					style: {color: 'blue', weight: 4},
+					onEachFeature: function (feature, layer) {
+						if (feature.properties && feature.properties.name) {
+							layer.bindPopup(feature.properties.name);
+						}
+						if (feature.properties && feature.properties.description) {
+							layer.bindPopup(feature.properties.description);
+						}
+					}
+				}).addTo(map);
 
-          // Step 2: Parse KML to GeoJSON using togeojson
-          const kmlDoc = new DOMParser().parseFromString(kmlText, 'text/xml');
-          const geojson = toGeoJSON.kml(kmlDoc);
+				// Step 5: Fit map to bounds
+				if (geojson.features.length > 0) {
+					map.fitBounds(currentLayer.getBounds());
+				} else {
+					alert('No features found for this query.');
+				}
 
-          // Step 3: Remove previous layer
-          if (currentLayer) {
-            map.removeLayer(currentLayer);
-          }
+			}
 
-          // Step 4: Add new GeoJSON layer
-          currentLayer = L.geoJSON(geojson, {
-            style: {color: 'blue', weight: 4},
-            onEachFeature: function (feature, layer) {
-              if (feature.properties && feature.properties.name) {
-                layer.bindPopup(feature.properties.name);
-              }
-            }
-          }).addTo(map);
+			let drawCircle = null;
+			map.on('mousedown', async e => {
+				if (!e.originalEvent.altKey) return;
 
-          // Step 5: Fit map to bounds
-          if (geojson.features.length > 0) {
-            map.fitBounds(currentLayer.getBounds());
-          } else {
-            alert('No features found for this query.');
-          }
+				if (drawCircle) drawCircle.remove()
+				map.dragging.disable();
 
-        } catch (err) {
-          console.error(err);
-          alert('Error: ' + err.message);
-        }
-      });
+				const center = e.latlng;
+				let radius = 0
 
-    </script>
+				drawCircle = L.circle(center, {radius: radius, fill: false}).addTo(map);
 
-  </main>
+				const moveHandler = e => {
+					radius = center.distanceTo(e.latlng);
+					drawCircle.setRadius(radius);
+				};
+
+				const upHandler = async () => {
+					map.off('mousemove', moveHandler);
+					map.off('mouseup', upHandler);
+					map.dragging.enable();
+
+					const formData = new FormData()
+					formData.append("lat", center.lat)
+					formData.append("lng", center.lng)
+					formData.append("rad", radius)
+
+					const response = await fetch('/nodes-within-radius', {
+						method: 'POST',
+						body: formData
+					})
+
+					if (!response.ok) {
+						console.warn(`something went wrong: ${response.error}`)
+						alert('something went wrong with your request, please try again')
+						return
+					}
+
+					const respJson = await response.json()
+					handleResponse(respJson)
+				};
+
+				map.on('mousemove', moveHandler);
+				map.on('mouseup', upHandler);
+			});
+
+
+			document.getElementById('query-form').addEventListener('submit', async function (e) {
+				e.preventDefault(); // Prevent full page reload
+
+				const formData = new FormData(this);
+
+				const response = await fetch('/', {
+					method: 'POST',
+					body: formData
+				});
+
+				if (!response.ok) {
+					cosnole.warn(`search query failed: ${response.error}`)
+					alert(`query failed`)
+					return
+				}
+
+				respJson = await response.json()
+				handleResponse(respJson)
+			});
+
+		</script>
+
+	</main>
 
 </body>
 

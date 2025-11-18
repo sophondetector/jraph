@@ -44,6 +44,7 @@ def get_conn() -> psycopg.Connection:
     host = _get_host()
     conn_str = f"host={host} dbname={_DB_NAME} user={_DB_USER}"
     if _CONN is None:
+        # TODO make this a proper logging statement
         print("connecting to database...", end='')
         _CONN = psycopg.connect(conn_str)
         print("done")
@@ -60,8 +61,9 @@ def _row2node(row: Tuple[int, dict]) -> Node:
     return Node(node_id, long=long, lat=lat, properties=props)
 
 
-def _row2edge(row: Tuple[int, int, int, dict]) -> Edge:
-    edge_id, source_id, target_id, props = row
+def _row2edge(row: Tuple[int, int, int, str]) -> Edge:
+    edge_id, source_id, target_id, link = row
+    props = {"description": link}
     return Edge(edge_id, source_id, target_id, props)
 
 
@@ -73,6 +75,29 @@ def query_node(node_id: int) -> Optional[Node]:
     if row is None:
         return None
     return _row2node(row)
+
+
+def query_nodes_within_radius(
+    lat: float,
+    long: float,
+    r_meters: float = 50000
+) -> Optional[List[Node]]:
+    with get_cur() as cur:
+        cur.execute(
+            """
+            SELECT g.node_id, g.geocoded_address
+            FROM node_points n
+            INNER JOIN
+            geocoded_addresses g
+            ON n.node_id = g.node_id
+            WHERE ST_DWithin(
+                n.coord::geometry::geography,
+                ST_MakePoint(%s, %s)::geography,
+                %s
+            );""",
+            (long, lat, r_meters)
+        )
+        return [_row2node(row) for row in cur.fetchall()]
 
 
 def query_n_nearest_nodes(lat: float, long: float, n: int = 10) -> List[int]:
@@ -179,8 +204,16 @@ def insert_edge(
         get_conn().commit()
 
 
+def check_for_sql_injection(search_str: str) -> bool:
+    for char in search_str:
+        if not char.isalnum():
+            print('WARNING: str tested positive for sql injection')
+            print(search_str)
+            return True
+    return False
+
+
 def query_node_prop(value: str) -> List[Node]:
-    # TODO secure this!
     sql = """
     SELECT node_id, geocoded_address
     FROM geocoded_addresses

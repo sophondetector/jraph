@@ -7,6 +7,10 @@ main {
 	display: flex
 }
 
+header {
+  margin-bottom: 1rem;
+}
+
 main>* {
 	min-width: 50ch;
 	margin: 5px

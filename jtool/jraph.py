@@ -70,6 +70,9 @@ class Jraph:
             if (source is None) or (target is None):
                 continue
             ls = kml.newlinestring()
+            desc = edge.properties.get("description")
+            if desc is not None:
+                ls.description = desc
             ls.coords = [self.get_coords(source), self.get_coords(target)]
 
         return kml
@@ -90,7 +93,7 @@ class Jraph:
         self.nodes = []
         self.edges = []
 
-    def get_coords(self, node: Node) -> tuple[float, float]:
+    def get_coords(self, node: Node) -> Optional[tuple[float, float]]:
         return node.get_coords()
 
     def get_name(self, node: Node) -> str:
