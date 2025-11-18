@@ -2,10 +2,10 @@ import os
 import json
 
 import psycopg
+import pandas as pd
 from dotenv import load_dotenv
 from typing import Optional, Union, List, Tuple
 
-from .utils import nan2none
 from .classes import Node, Edge
 
 load_dotenv()
@@ -29,6 +29,18 @@ _DB_USER = os.getenv(_DB_USER_VAR)
 #     return pw
 
 
+def _nan2none(d: dict) -> dict:
+    """
+    recurses through dict changing NaN to None
+    """
+    for k in d.keys():
+        if pd.isna(d[k]):
+            d[k] = None
+        if type(d[k]) is dict:
+            d[k] = _nan2none(d[k])
+    return d
+
+
 def _get_host():
     host = os.getenv(_DB_HOST_VAR)
     if not host:
@@ -37,6 +49,15 @@ def _get_host():
     if host[0] == '"' and host[-1] == '"':
         return host[1:-1]
     return host
+
+
+def check_for_sql_injection(search_str: str) -> bool:
+    for char in search_str:
+        if not char.isalnum():
+            print('WARNING: str tested positive for sql injection')
+            print(search_str)
+            return True
+    return False
 
 
 def get_conn() -> psycopg.Connection:
@@ -168,7 +189,7 @@ def insert_node(
         cur = get_cur()
 
     if type(props) is dict:
-        props = nan2none(props)
+        props = _nan2none(props)
         props = json.dumps(props)
         # TODO use a better json encoder for this
 
@@ -192,7 +213,7 @@ def insert_edge(
         props = '{}'
 
     if type(props) is dict:
-        props = nan2none(props)
+        props = _nan2none(props)
         props = json.dumps(props)
         # TODO use a better json encoder for this
 
@@ -202,15 +223,6 @@ def insert_edge(
             VALUES (%s, %s, %s)""",
             (source_id, target_id, props))
         get_conn().commit()
-
-
-def check_for_sql_injection(search_str: str) -> bool:
-    for char in search_str:
-        if not char.isalnum():
-            print('WARNING: str tested positive for sql injection')
-            print(search_str)
-            return True
-    return False
 
 
 def query_node_prop(value: str) -> List[Node]:
