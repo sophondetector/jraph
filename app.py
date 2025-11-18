@@ -5,7 +5,12 @@ from typing import Optional
 from flask import Flask, request, render_template, send_file, abort, jsonify
 
 from jtool.jraph import Jraph
-from jtool.dbc import query_many_node_edges, query_node_prop, query_nodes_within_radius, check_for_sql_injection
+from jtool.dbc import (
+    query_many_node_edges,
+    query_node_prop,
+    query_nodes_within_radius,
+    check_for_sql_injection
+)
 
 
 app = Flask("jraph")
