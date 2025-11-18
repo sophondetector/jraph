@@ -26,9 +26,15 @@ def nodes_within_radius():
         return abort(500, 'nodes-within-radius: missing parameters')
 
     nodes = query_nodes_within_radius(lat, lng, r_meters)
-    # TODO GET EDGES TOO
+    if nodes is None:
+        return jsonify({
+            "previousQuery": PREVIOUS_QUERIES[-1],
+            "kml": None
+        })
 
-    LAST_JRAPH = Jraph(nodes)
+    edges = query_many_node_edges([n.node_id for n in nodes])
+
+    LAST_JRAPH = Jraph(nodes=nodes, edges=edges)
     kml = LAST_JRAPH.j2k().kml()
     PREVIOUS_QUERIES.append(f"lat: {lat}\tlong: {lng}")
     return jsonify({
