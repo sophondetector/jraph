@@ -6,7 +6,7 @@ if [[ $USER != "root" ]]; then
 fi
 
 HOST="0.0.0.0"
-PORT=443
+PORT=80
 
 gunicorn \
   --bind $HOST:$PORT \
