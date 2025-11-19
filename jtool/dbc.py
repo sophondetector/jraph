@@ -13,20 +13,10 @@ load_dotenv()
 _CONN = None
 _DB_HOST_VAR = "DB_HOST"
 _DB_USER_VAR = "DB_USER"
-# _DB_PASSWORD_VAR = "DB_PASSWORD"
+_DB_PASSWORD_VAR = "DB_PASSWORD"
 
 _DB_NAME = "offshore_leaks"
 _DB_USER = os.getenv(_DB_USER_VAR)
-
-# TODO Password protect the database!!
-# def _get_pass():
-#     pw = os.getenv(_DB_PASSWORD_VAR)
-#     if not pw:
-#         print(f"{_DB_PASSWORD_VAR} required in env!")
-#         exit(1)
-#     if pw[0] == '"' and pw[-1] == '"':
-#         return pw[1:-1]
-#     return pw
 
 
 def _nan2none(d: dict) -> dict:
@@ -41,16 +31,6 @@ def _nan2none(d: dict) -> dict:
     return d
 
 
-def _get_host():
-    host = os.getenv(_DB_HOST_VAR)
-    if not host:
-        print(f"{_DB_HOST_VAR} required in env!")
-        exit(1)
-    if host[0] == '"' and host[-1] == '"':
-        return host[1:-1]
-    return host
-
-
 def check_for_sql_injection(search_str: str) -> bool:
     for char in search_str:
         if not char.isalnum():
@@ -61,14 +41,33 @@ def check_for_sql_injection(search_str: str) -> bool:
 
 
 def get_conn() -> psycopg.Connection:
-    global _CONN
-    host = _get_host()
-    conn_str = f"host={host} dbname={_DB_NAME} user={_DB_USER}"
-    if _CONN is None:
-        # TODO make this a proper logging statement
-        print("connecting to database...", end='')
-        _CONN = psycopg.connect(conn_str)
-        print("done")
+    global _CONN, _DB_HOST_VAR, _DB_PASSWORD_VAR, _DB_NAME, _DB_USER
+
+    if _CONN is not None:
+        return _CONN
+
+    # TODO make this a proper logging statement
+    print("connecting to database...", end='')
+
+    host = os.getenv(_DB_HOST_VAR)
+    if host is None:
+        print(f'{_DB_HOST_VAR} required in env!')
+        exit(1)
+
+    password = os.getenv(_DB_PASSWORD_VAR)
+    if password is None:
+        print(f'{_DB_PASSWORD_VAR} required in env!')
+        exit(1)
+
+    conn_str = "host={} dbname={} user={} password={}".format(
+        host,
+        _DB_NAME,
+        _DB_USER,
+        password
+    )
+    _CONN = psycopg.connect(conn_str)
+    print("done")
+
     return _CONN
 
 
@@ -235,3 +234,16 @@ def query_node_prop(value: str) -> List[Node]:
     with get_cur() as cur:
         cur.execute(sql)
         return [_row2node(r) for r in cur.fetchall()]
+
+
+if __name__ == '__main__':
+    print('TESTING JRAPH CONN')
+    with get_cur() as cur:
+        cur.execute(
+            """
+            SELECT * FROM node_points LIMIT 10;
+            """
+        )
+        for res in cur.fetchall():
+            print(res)
+    print('DONE')
