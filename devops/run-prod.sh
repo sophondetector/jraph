@@ -7,8 +7,9 @@ fi
 
 HOST="0.0.0.0"
 PORT=80
+THREADS=4
 
 gunicorn \
   --bind $HOST:$PORT \
-  --threads 4 \
+  --threads $THREADS \
   app:app
