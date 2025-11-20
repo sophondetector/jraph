@@ -97,8 +97,7 @@ class Jraph:
         return node.get_coords()
 
     def get_name(self, node: Node) -> str:
-        feature: dict = node.properties['features'][0]
-        geocoding: dict = feature['properties']['geocoding']
+        geocoding: dict = node.properties['properties']['geocoding']
         name = geocoding.get("name")
         if name is None:
             name = geocoding.get("label")

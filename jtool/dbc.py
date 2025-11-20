@@ -77,7 +77,8 @@ def get_cur() -> psycopg.Cursor:
 
 def _row2node(row: Tuple[int, dict]) -> Node:
     node_id, props = row
-    long, lat = props['features'][0]['geometry']['coordinates']
+    # print(props)
+    long, lat = props['geometry']['coordinates']
     return Node(node_id, long=long, lat=lat, properties=props)
 
 
@@ -105,7 +106,7 @@ def query_nodes_within_radius(
     with get_cur() as cur:
         cur.execute(
             """
-            SELECT g.node_id, g.geocoded_address
+            SELECT  g.node_id, g.geocoded_address->'features'->0
             FROM node_points n
             INNER JOIN
             geocoded_addresses g
@@ -226,7 +227,7 @@ def insert_edge(
 
 def query_node_prop(value: str) -> List[Node]:
     sql = """
-    SELECT node_id, geocoded_address
+    SELECT node_id, geocoded_address->'features'->0
     FROM geocoded_addresses
     WHERE geocoded_address->'features'->0->'properties'->>'geocoding'
     LIKE '%{}%';
