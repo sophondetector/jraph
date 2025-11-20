@@ -1,10 +1,10 @@
 import os
 import json
+from typing import Optional, Union, List, Tuple
 
 import psycopg
 import pandas as pd
 from dotenv import load_dotenv
-from typing import Optional, Union, List, Tuple
 
 from .classes import Node, Edge
 
@@ -14,9 +14,8 @@ _CONN = None
 _DB_HOST_VAR = "DB_HOST"
 _DB_USER_VAR = "DB_USER"
 _DB_PASSWORD_VAR = "DB_PASSWORD"
-
 _DB_NAME = "offshore_leaks"
-_DB_USER = os.getenv(_DB_USER_VAR)
+_TIMEOUT = 10
 
 
 def _nan2none(d: dict) -> dict:
@@ -32,41 +31,42 @@ def _nan2none(d: dict) -> dict:
 
 
 def check_for_sql_injection(search_str: str) -> bool:
+    """
+    checks for non alphanum chars in search_str
+    returns True if one is found - else False
+    """
     for char in search_str:
         if not char.isalnum():
-            print('WARNING: str tested positive for sql injection')
-            print(search_str)
             return True
     return False
 
 
 def get_conn() -> psycopg.Connection:
-    global _CONN, _DB_HOST_VAR, _DB_PASSWORD_VAR, _DB_NAME, _DB_USER
+    global _CONN, _DB_HOST_VAR, _DB_PASSWORD_VAR, _DB_NAME, _DB_USER, _TIMEOUT
 
     if _CONN is not None:
         return _CONN
 
-    # TODO make this a proper logging statement
-    print("connecting to database...", end='')
-
     host = os.getenv(_DB_HOST_VAR)
     if host is None:
-        print(f'{_DB_HOST_VAR} required in env!')
-        exit(1)
+        raise Exception(f'{_DB_HOST_VAR} required in env!')
 
     password = os.getenv(_DB_PASSWORD_VAR)
     if password is None:
-        print(f'{_DB_PASSWORD_VAR} required in env!')
-        exit(1)
+        raise Exception(f'{_DB_PASSWORD_VAR} required in env!')
+
+    user = os.getenv(_DB_USER_VAR)
+    if user is None:
+        raise Exception(f'{_DB_USER_VAR} required in env!')
 
     conn_str = "host={} dbname={} user={} password={}".format(
         host,
         _DB_NAME,
-        _DB_USER,
+        user,
         password
     )
-    _CONN = psycopg.connect(conn_str)
-    print("done")
+
+    _CONN = psycopg.connect(conn_str, connect_timeout=_TIMEOUT)
 
     return _CONN
 

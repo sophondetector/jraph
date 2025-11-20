@@ -7,9 +7,12 @@
 Jraph runs as a `systemd` service named `jraph-app.service`.
 To initialize or reinitialize the service, do the following:
 
-1. `cp devops/jraph-app.service /usr/lib/systemd/system`
+1. `cp $PWD/devops/jraph-app.service /usr/lib/systemd/system/jraph-app.service`
 1. `systemctl daemon-reload`
 1. `systemctl start jraph-app.service`
 1. `systemctl status jraph-app.service`
 
+`$ journalctl -u jraph-app.service -f` to see logs
+
+Also ensure `journald.conf` has `Storage=persistent`
 

@@ -1,4 +1,5 @@
 import io
+import logging
 
 from typing import Optional
 
@@ -9,11 +10,26 @@ from jtool.dbc import (
     query_many_node_edges,
     query_node_prop,
     query_nodes_within_radius,
-    check_for_sql_injection
+    check_for_sql_injection,
+    get_conn
 )
 
 
 app = Flask("jraph")
+gunicorn_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers = gunicorn_logger.handlers
+app.logger.setLevel(gunicorn_logger.level)
+
+app.logger.info("establishing connection to database...")
+
+try:
+    get_conn()
+except Exception as e:
+    app.logger.error("could not connect to database!")
+    app.logger.error(e)
+    quit(1)
+
+app.logger.info("connection established")
 
 # TODO change so there are session objects
 LAST_JRAPH: Optional[Jraph] = None
@@ -89,6 +105,8 @@ def index():
         })
 
     if check_for_sql_injection(search):
+        app.logger.warning("SQL INJECTION DETECTED: {}".format(search))
+        app.logger.warning("SQL INJECTION IP: {}".format(request.remote_addr))
         return abort(500, 'something went wrong')
 
     nodes = query_node_prop(search)

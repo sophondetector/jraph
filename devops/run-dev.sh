@@ -3,7 +3,9 @@
 HOST="localhost"
 PORT=4000
 
-flask run \
-	--debug \
-	--port $PORT \
-	--host $HOST
+gunicorn \
+  --bind $HOST:$PORT \
+  --access-logfile=- \
+  --log-level debug \
+  --reload \
+  app:app
