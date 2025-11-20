@@ -111,7 +111,7 @@ def query_nodes_within_radius(
             geocoded_addresses g
             ON n.node_id = g.node_id
             WHERE ST_DWithin(
-                n.coord::geometry::geography,
+                n.geog,
                 ST_MakePoint(%s, %s)::geography,
                 %s
             );""",

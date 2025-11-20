@@ -57,7 +57,7 @@ def nodes_within_radius():
 
     LAST_JRAPH = Jraph(nodes=nodes, edges=edges)
     kml = LAST_JRAPH.j2k().kml()
-    PREVIOUS_QUERIES.append(f"lat: {lat}\tlong: {lng}")
+    PREVIOUS_QUERIES.append(f"lat: {lat}\tlong: {lng}\trad_meters:{r_meters}")
     return jsonify({
         "previousQuery": PREVIOUS_QUERIES[-1],
         "kml": kml
