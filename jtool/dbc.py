@@ -103,7 +103,7 @@ def query_node(node_id: int) -> Optional[Node]:
                 geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
                 geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
             FROM
-                geocoded_addresses
+                nodes_nom_addresses
             WHERE node_id=%s;
             """,
             (node_id,)
@@ -130,7 +130,7 @@ def query_nodes_within_radius(
                 geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
             FROM node_points n
             INNER JOIN
-                geocoded_addresses g
+                nodes_nom_addresses g
             ON n.node_id = g.node_id
             WHERE ST_DWithin(
                 n.geog,
@@ -254,7 +254,7 @@ def query_node_prop(value: str) -> List[Node]:
         geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
         geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
         geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
-    FROM geocoded_addresses
+    FROM nodes_nom_addresses
     WHERE geocoded_address->'features'->0->'properties'->>'geocoding'
     LIKE '%{}%';
     """.format(value)
