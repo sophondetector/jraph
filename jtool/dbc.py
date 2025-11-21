@@ -75,8 +75,14 @@ def get_cur() -> psycopg.Cursor:
     return get_conn().cursor()
 
 
-def _row2node(row: Tuple[int, float, float, dict]) -> Node:
-    node_id, long, lat, props = row
+def _row2node(
+    row: Tuple[int, float, float, Optional[str], Optional[str]]
+) -> Node:
+    node_id, long, lat, name, label = row
+    props = {
+        "name": name,
+        "label": label
+    }
     return Node(node_id, long=long, lat=lat, properties=props)
 
 
@@ -94,7 +100,8 @@ def query_node(node_id: int) -> Optional[Node]:
                 node_id,
                 geocoded_address->'features'->0->'geometry'->'coordinates'->>0 as long,
                 geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
-                geocoded_address->'features'->0->'properties'->'geocoding' as properties
+                geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
+                geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
             FROM
                 geocoded_addresses
             WHERE node_id=%s;
@@ -119,7 +126,8 @@ def query_nodes_within_radius(
                 g.node_id,
                 geocoded_address->'features'->0->'geometry'->'coordinates'->>0 as long,
                 geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
-                geocoded_address->'features'->0->'properties'->'geocoding' as properties
+                geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
+                geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
             FROM node_points n
             INNER JOIN
                 geocoded_addresses g
@@ -244,7 +252,8 @@ def query_node_prop(value: str) -> List[Node]:
         node_id,
         geocoded_address->'features'->0->'geometry'->'coordinates'->>0 as long,
         geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
-        geocoded_address->'features'->0->'properties'->'geocoding' as properties
+        geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
+        geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
     FROM geocoded_addresses
     WHERE geocoded_address->'features'->0->'properties'->>'geocoding'
     LIKE '%{}%';
