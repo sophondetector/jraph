@@ -97,10 +97,9 @@ class Jraph:
         return node.get_coords()
 
     def get_name(self, node: Node) -> str:
-        geocoding: dict = node.properties['properties']['geocoding']
-        name = geocoding.get("name")
+        name = node.properties.get("name")
         if name is None:
-            name = geocoding.get("label")
+            name = node.properties.get("label")
             if name is None:
                 name = _DEFAULT_NAME + ' ' + str(self.name_inc)
                 self.name_inc += 1

@@ -75,10 +75,8 @@ def get_cur() -> psycopg.Cursor:
     return get_conn().cursor()
 
 
-def _row2node(row: Tuple[int, dict]) -> Node:
-    node_id, props = row
-    # print(props)
-    long, lat = props['geometry']['coordinates']
+def _row2node(row: Tuple[int, float, float, dict]) -> Node:
+    node_id, long, lat, props = row
     return Node(node_id, long=long, lat=lat, properties=props)
 
 
@@ -91,7 +89,18 @@ def _row2edge(row: Tuple[int, int, int, str]) -> Edge:
 def query_node(node_id: int) -> Optional[Node]:
     with get_cur() as cur:
         cur.execute(
-            "SELECT * FROM geocoded_addresses WHERE node_id=%s;", (node_id,))
+            """
+            SELECT
+                node_id,
+                geocoded_address->'features'->0->'geometry'->'coordinates'->>0 as long,
+                geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
+                geocoded_address->'features'->0->'properties'->'geocoding' as properties
+            FROM
+                geocoded_addresses
+            WHERE node_id=%s;
+            """,
+            (node_id,)
+        )
         row = cur.fetchone()
     if row is None:
         return None
@@ -106,10 +115,14 @@ def query_nodes_within_radius(
     with get_cur() as cur:
         cur.execute(
             """
-            SELECT  g.node_id, g.geocoded_address->'features'->0
+            SELECT
+                g.node_id,
+                geocoded_address->'features'->0->'geometry'->'coordinates'->>0 as long,
+                geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
+                geocoded_address->'features'->0->'properties'->'geocoding' as properties
             FROM node_points n
             INNER JOIN
-            geocoded_addresses g
+                geocoded_addresses g
             ON n.node_id = g.node_id
             WHERE ST_DWithin(
                 n.geog,
@@ -227,7 +240,11 @@ def insert_edge(
 
 def query_node_prop(value: str) -> List[Node]:
     sql = """
-    SELECT node_id, geocoded_address->'features'->0
+    SELECT
+        node_id,
+        geocoded_address->'features'->0->'geometry'->'coordinates'->>0 as long,
+        geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
+        geocoded_address->'features'->0->'properties'->'geocoding' as properties
     FROM geocoded_addresses
     WHERE geocoded_address->'features'->0->'properties'->>'geocoding'
     LIKE '%{}%';
