@@ -128,7 +128,7 @@ def query_nodes_within_radius(
                 geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
                 geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
                 geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
-            FROM node_points n
+            FROM nodes_geog n
             INNER JOIN
                 nodes_nom_addresses g
             ON n.node_id = g.node_id
@@ -145,7 +145,7 @@ def query_nodes_within_radius(
 def query_n_nearest_nodes(lat: float, long: float, n: int = 10) -> List[int]:
     with get_cur() as cur:
         cur.execute(
-            """SELECT node_id FROM node_points
+            """SELECT node_id FROM nodes_geog
             ORDER BY coord <-> POINT (%s, %s)
             LIMIT %s
             """,
@@ -268,7 +268,7 @@ if __name__ == '__main__':
     with get_cur() as cur:
         cur.execute(
             """
-            SELECT * FROM node_points LIMIT 10;
+            SELECT * FROM nodes_geog LIMIT 10;
             """
         )
         for res in cur.fetchall():
