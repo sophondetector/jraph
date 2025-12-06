@@ -36,6 +36,18 @@ LAST_JRAPH: Optional[Jraph] = None
 PREVIOUS_QUERIES = []
 
 
+@app.route("/related-nodes", methods=["POST"])
+def related_nodes():
+    node_id = request.form.get("node_id")
+    if node_id is None:
+        return abort(500, "missing param: node_id")
+
+    # return jraph object consisting ONLY of the queried node
+    # and its connected neighbors and the edges to/from the node
+    # then return as geoJSON
+    return abort(500, "not implemented yet!")
+
+
 @app.route("/nodes-within-radius", methods=["POST"])
 def nodes_within_radius():
     global LAST_JRAPH, PREVIOUS_QUERIES
@@ -50,17 +62,17 @@ def nodes_within_radius():
     if nodes is None:
         return jsonify({
             "previousQuery": PREVIOUS_QUERIES[-1],
-            "kml": None
+            "geoJson": None
         })
 
     edges = query_many_node_edges([n.node_id for n in nodes])
 
     LAST_JRAPH = Jraph(nodes=nodes, edges=edges)
-    kml = LAST_JRAPH.j2k().kml()
+    geojson = LAST_JRAPH.j2gj()
     PREVIOUS_QUERIES.append(f"lat: {lat}\tlong: {lng}\trad_meters:{r_meters}")
     return jsonify({
         "previousQuery": PREVIOUS_QUERIES[-1],
-        "kml": kml
+        "geoJson": geojson
     })
 
 
@@ -112,10 +124,10 @@ def index():
     nodes = query_node_prop(search)
     edges = query_many_node_edges([n.node_id for n in nodes])
     jr = Jraph(nodes=nodes, edges=edges)
-    kml = jr.j2k().kml()
+    geo_json = jr.j2gj()
     LAST_JRAPH = jr
 
     return jsonify({
         "previousQuery": PREVIOUS_QUERIES[-1],
-        "kml": kml
+        "geoJson": geo_json
     })

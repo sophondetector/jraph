@@ -1,13 +1,14 @@
-from typing import Iterable, Optional, List, Union
 from io import BytesIO
+from typing import Iterable, Optional, List, Union
 
-from shapely.geometry import Point
-import geopandas as gpd
-import simplekml as sk
+import geojson
 import pandas as pd
+import simplekml as sk
+import geopandas as gpd
+from shapely.geometry import Point
 
-from .dbc import query_n_nearest_nodes, query_node, query_node_edges
 from .classes import Node, Edge
+from .dbc import query_n_nearest_nodes, query_node, query_node_edges
 
 
 _DEFAULT_NAME = 'JRAPH NODE'
@@ -22,6 +23,39 @@ class Jraph:
         self.nodes = nodes if nodes is not None else []
         self.edges = edges if edges is not None else []
         self.name_inc = 0
+
+    def j2gj(self) -> geojson.FeatureCollection:
+        """
+        Export nodes and edges in Jraph as a geojson.FeatureCollection
+        """
+        feats = []
+        for node in self.nodes:
+            iter_feature = geojson.Feature(
+                id=node.node_id,
+                geometry=geojson.Point(node.get_coords()),
+                properties=node.properties
+            )
+            feats.append(iter_feature)
+
+        for edge in self.edges:
+            source = self.get_jraph_node(edge.source_id)
+            target = self.get_jraph_node(edge.target_id)
+            if not (source and target):
+                continue
+
+            iter_feature = geojson.Feature(
+                geometry=geojson.LineString(
+                    [
+                        source.get_coords(),
+                        target.get_coords()
+                    ]
+                ),
+                properties=edge.properties
+            )
+            feats.append(iter_feature)
+
+        res = geojson.FeatureCollection(feats)
+        return res
 
     def j2q(self) -> BytesIO:
         """
@@ -148,11 +182,19 @@ if __name__ == '__main__':
 
     outpath = 'jraph-test-output.kml'
     jraph = Jraph()
-    for nid in [262892, 262897, 262988]:
+    for nid in [262892, 262897, 262988, 14003462]:
         node = query_node(nid)
         edges = query_node_edges(nid)
         jraph.add(node, edges)
+
+    print('Testing KML output...')
     kml = jraph.j2k()
     print('saving kml to {}...'.format(outpath), end='')
     kml.save(outpath)
-    print('success')
+    print('KML output success')
+
+    print('Testing geojson output...')
+    gj = jraph.j2g()
+    gj_str = geojson.dumps(gj, indent=4)
+    print(gj_str)
+    print('GeoJson output test done')

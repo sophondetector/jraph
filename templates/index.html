@@ -25,33 +25,38 @@
   </header>
 
   <main>
-    <div>
 
-      <div id="control-panel">
+    <div id="control-panel">
 
-        <form action="/" method="POST" id="query-form">
-          <label for="search">Search</label>
-          <input type="text" name="search" id="search">
-          <button type="submit">Submit</button>
-        </form>
+      <form action="/" method="POST" id="query-form">
+        <label for="search">Search</label>
+        <input type="text" name="search" id="search">
+        <button type="submit">Submit</button>
+      </form>
 
-      </div>
-
-      <div>
-        <a href="/download">Download KML</a>
-        <a href="/download-gpkg">Download GPKG</a>
-
-        <h4>Kml Preview</h4>
-        <pre id="kml-display"></pre>
-
-        <h3>Previous Queries</h3>
-        <ol id="prev">
-        </ol>
-        <br>
-      </div>
     </div>
 
     <div id="map"></div>
+
+    <div id="bottom-section">
+
+      <div id="download-links">
+        <a href="/download">Download KML</a>
+        <a href="/download-gpkg">Download GPKG</a>
+      </div>
+
+      <div id="output">
+
+        <div>
+          <h3>Previous Queries</h3>
+          <ol id="prev">
+          </ol>
+        </div>
+
+      </div>
+
+    </div>
+
 
   </main>
 

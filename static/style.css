@@ -4,11 +4,16 @@
 }
 
 main {
-	display: flex
+	display: flex;
+  flex-direction: column;
+  align-items: center
 }
 
 header {
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 main>* {
@@ -16,23 +21,32 @@ main>* {
 	margin: 5px
 }
 
-#kml-display {
-	font-family: monospace;
-	height: 300px;
-	width: 50ch;
-	overflow: scroll;
-}
-
 #control-panel>form>* {
   margin-bottom: 1rem;
 }
 
-#prev {
-	max-height: 300px
+#map {
+	width: 1500px;
+	height: 700px;
+  margin: auto
 }
 
-#map {
-	width: 900px;
-	height: 800px;
-  margin: auto
+#bottom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center
+}
+
+#output {
+  display: flex;
+  align-items: flex-start;
+}
+
+#download-links {
+  display: flex;
+  align-items: center
+}
+
+#download-links>a {
+  margin: 1rem;
 }

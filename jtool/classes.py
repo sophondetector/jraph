@@ -1,18 +1,23 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 
 class Node:
     def __init__(
         self,
         node_id: int,
-        long: Optional[float] = None,
-        lat: Optional[float] = None,
+        long: Optional[Union[float, int, str]] = None,
+        lat: Optional[Union[float, int, str]] = None,
         properties: Optional[dict] = None
     ):
-        self.node_id = node_id
+        self.node_id: int = node_id
 
         self.long = long
+        if self.long is not None:
+            self.long = float(self.long)
+
         self.lat = lat
+        if self.lat is not None:
+            self.lat = float(self.lat)
 
         self.properties = dict()
         if type(properties) is dict:
