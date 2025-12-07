@@ -10,6 +10,7 @@ from jtool.dbc import (
     query_many_node_edges,
     query_node_prop,
     query_nodes_within_radius,
+    query_connected_nodes,
     check_for_sql_injection,
     get_conn
 )
@@ -33,19 +34,30 @@ app.logger.info("connection established")
 
 # TODO change so there are session objects
 LAST_JRAPH: Optional[Jraph] = None
+
+# TODO push previous queries to the client
 PREVIOUS_QUERIES = []
 
 
 @app.route("/related-nodes", methods=["POST"])
 def related_nodes():
-    node_id = request.form.get("node_id")
+    global PREVIOUS_QUERIES
+    node_id = request.form.get("nodeId", type=int)
+    print(request.form)
     if node_id is None:
-        return abort(500, "missing param: node_id")
+        return abort(500, "missing param: nodeId")
 
-    # return jraph object consisting ONLY of the queried node
-    # and its connected neighbors and the edges to/from the node
-    # then return as geoJSON
-    return abort(500, "not implemented yet!")
+    jr = Jraph()
+    for edge, node in query_connected_nodes(node_id):
+        jr.add_edge(edge)
+        jr.add_node(node)
+
+    geojson = jr.j2gj()
+    PREVIOUS_QUERIES.append(f'Connections to {node_id}')
+    return jsonify({
+        "previousQuery": PREVIOUS_QUERIES[-1],
+        "geoJson": geojson
+    })
 
 
 @app.route("/nodes-within-radius", methods=["POST"])

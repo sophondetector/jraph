@@ -194,7 +194,7 @@ if __name__ == '__main__':
     print('KML output success')
 
     print('Testing geojson output...')
-    gj = jraph.j2g()
+    gj = jraph.j2gj()
     gj_str = geojson.dumps(gj, indent=4)
     print(gj_str)
     print('GeoJson output test done')

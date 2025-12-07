@@ -25,42 +25,98 @@ control.loader.on('data:error', function (error) {
 });
 let currentLayer = null; // To remove previous results
 
-function handleResponse(respJson) {
-  // Auto-load KML into map from server response
+// TODO write makeNodeFeatureDiv and makeEdgeFeatureDiv
+function makeFeatureDiv(feature) {
+  const featureDiv = document.createElement('div')
 
+  if (feature.id) {
+    const idPara = document.createElement('p')
+    idPara.textContent = `Node Id: ${feature.id}`
+    featureDiv.appendChild(idPara)
+  }
+
+  if (feature.properties && feature.properties.name) {
+    const namePara = document.createElement('p')
+    namePara.textContent = feature.properties.name
+    featureDiv.appendChild(namePara)
+  }
+
+  if (feature.properties && feature.properties.description) {
+    const descPara = document.createElement('p')
+    descPara.textContent = feature.properties.description
+    featureDiv.appendChild(descPara)
+  }
+
+  if (feature.properties && feature.properties.label) {
+    const labPara = document.createElement('p')
+    labPara.textContent = feature.properties.label
+    featureDiv.appendChild(labPara)
+  }
+
+  // There being a feature.id means its a Node feature
+  // We only want to add the get related nodes button 
+  // if its a Node feature
+  if (feature.id) {
+    const button = document.createElement('button')
+    button.textContent = "Get Related Nodes"
+
+    const formData = new FormData()
+    formData.append("nodeId", feature.id)
+
+    button.addEventListener('click', async () => {
+      const resp = await fetch('/related-nodes', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!resp.ok) {
+        console.log('SERVER ERROR')
+        const body = await resp.body()
+        console.log(body)
+        return
+      }
+
+      const json = await resp.json()
+      handleResponse(json)
+    })
+
+    featureDiv.appendChild(button)
+  }
+
+
+  return featureDiv
+}
+
+// TODO turn this to typescript and give respJson an interface
+function handleResponse(respJson) {
   // Append previous query to previous query list
   prevEntry = document.createElement('li')
   prevEntry.textContent = respJson.previousQuery
   document.getElementById('prev').appendChild(prevEntry)
 
-  // Step 2: Parse KML to GeoJSON using togeojson
   const geojson = respJson.geoJson
 
-  // Step 3: Remove previous layer
-  if (currentLayer) {
+  // Remove previous layer and drawCircle
+  if (currentLayer && geojson.features.length > 0) {
     map.removeLayer(currentLayer);
+    if (drawCircle) drawCircle.remove()
   }
 
-  // Step 4: Add new GeoJSON layer
+  // Add new GeoJSON layer
   currentLayer = L.geoJSON(geojson, {
     style: { color: 'blue', weight: 4 },
     onEachFeature: function (feature, layer) {
-      if (feature.properties && feature.properties.name) {
-        layer.bindPopup(feature.properties.name);
-      }
-      if (feature.properties && feature.properties.description) {
-        layer.bindPopup(feature.properties.description);
-      }
+      const featureDiv = makeFeatureDiv(feature)
+      layer.bindPopup(featureDiv)
     }
   }).addTo(map);
 
-  // Step 5: Fit map to bounds
+  // Fit map to bounds
   if (geojson.features.length > 0) {
     map.fitBounds(currentLayer.getBounds());
   } else {
     alert('No features found for this query.');
   }
-
 }
 
 let drawCircle = null;

@@ -201,51 +201,6 @@ def query_many_node_edges(node_id_arr: List[int]) -> List[Edge]:
         return [_row2edge(row) for row in cur.fetchall()]
 
 
-def insert_node(
-        nid,
-        props: Optional[Union[dict, str]] = None,
-        cur: Optional[psycopg.Cursor] = None):
-
-    if cur is None:
-        cur = get_cur()
-
-    if type(props) is dict:
-        props = _nan2none(props)
-        props = json.dumps(props)
-        # TODO use a better json encoder for this
-
-    with cur:
-        cur.execute('SET IDENTITY_INSERT node ON;')
-        cur.execute("INSERT node (node_id, properties) VALUES (%s, %s)",
-                    (nid, props))
-        get_conn().commit()
-
-
-def insert_edge(
-        source_id: int,
-        target_id: int,
-        props: Optional[Union[dict, str]] = None,
-        cur: Optional[psycopg.Cursor] = None):
-
-    if cur is None:
-        cur = get_cur()
-
-    if props is None:
-        props = '{}'
-
-    if type(props) is dict:
-        props = _nan2none(props)
-        props = json.dumps(props)
-        # TODO use a better json encoder for this
-
-    with cur:
-        cur.execute(
-            """INSERT edge (source_id, target_id, properties)
-            VALUES (%s, %s, %s)""",
-            (source_id, target_id, props))
-        get_conn().commit()
-
-
 def query_node_prop(value: str) -> List[Node]:
     sql = """
     SELECT
@@ -263,6 +218,31 @@ def query_node_prop(value: str) -> List[Node]:
         return [_row2node(r) for r in cur.fetchall()]
 
 
+def query_connected_nodes(node_id: int) -> List[Tuple[Edge, Node]]:
+    sql = """
+    SELECT
+        r.edge_id,
+        r._start,
+        r._end,
+        r.link,
+        a.node_id,
+        a.geocoded_address->'features'->0->'geometry'->'coordinates'->>0 as long,
+        a.geocoded_address->'features'->0->'geometry'->'coordinates'->>1 as lat,
+        a.geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
+        a.geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
+    FROM relationships r
+    INNER JOIN nodes_nom_addresses a
+    ON r._end = a.node_id OR r._start = a.node_id
+    WHERE r._end = %s OR r._start = %s;
+    """
+    with get_cur() as cur:
+        cur.execute(sql, (node_id, node_id))
+        return [
+            (_row2edge(r[:4]), _row2node(r[4:]))
+            for r in cur.fetchall()
+        ]
+
+
 if __name__ == '__main__':
     print('TESTING JRAPH CONN')
     with get_cur() as cur:
@@ -274,3 +254,8 @@ if __name__ == '__main__':
         for res in cur.fetchall():
             print(res)
     print('DONE')
+
+    print('TESTING query_connected_nodes')
+    res = query_connected_nodes(14003462)
+    for r in res:
+        print(r)
