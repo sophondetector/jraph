@@ -49,7 +49,7 @@ class Jraph:
             )
             self.add_node(iter_node)
 
-    def j2gj(self) -> geojson.FeatureCollection:
+    def as_geojson(self) -> geojson.FeatureCollection:
         """
         Export nodes and edges in Jraph as a geojson.FeatureCollection
         """
@@ -82,7 +82,7 @@ class Jraph:
         res = geojson.FeatureCollection(feats)
         return res
 
-    def j2q(self) -> BytesIO:
+    def as_gpkg(self) -> BytesIO:
         """
         Export geographic points with attributes to a GeoPackage file for QGIS.
         """
@@ -96,9 +96,7 @@ class Jraph:
             point = Point(lon, lat)
             geometries.append(point)
             record = {'node_id': node.node_id}
-            features = node.properties['features'][0]
-            geocoding = features['properties']['geocoding']
-            for key, value in geocoding.items():
+            for key, value in node.properties.items():
                 record[key] = value
             records.append(record)
 
@@ -114,7 +112,7 @@ class Jraph:
 
         return res
 
-    def j2k(self, kml: Optional[sk.Kml] = None) -> sk.Kml:
+    def as_kml(self, kml: Optional[sk.Kml] = None) -> sk.Kml:
         if kml is None:
             kml = sk.Kml()
 
@@ -214,13 +212,13 @@ if __name__ == '__main__':
         jraph.add(node, edges)
 
     print('Testing KML output...')
-    kml = jraph.j2k()
+    kml = jraph.as_kml()
     print('saving kml to {}...'.format(outpath), end='')
     kml.save(outpath)
     print('KML output success')
 
     print('Testing geojson output...')
-    gj = jraph.j2gj()
+    gj = jraph.as_geojson()
     gj_str = geojson.dumps(gj, indent=4)
     print(gj_str)
     print('GeoJson output test done')

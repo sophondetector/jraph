@@ -43,7 +43,7 @@ def related_nodes():
         jr.add_edge(edge)
         jr.add_node(node)
 
-    geojson = jr.j2gj()
+    geojson = jr.as_geojson()
     pq = f'Connections to {node_id}'
     return jsonify({
         "previousQuery": pq,
@@ -71,7 +71,7 @@ def nodes_within_radius():
     edges = query_many_node_edges([n.node_id for n in nodes])
 
     jr = Jraph(nodes=nodes, edges=edges)
-    geojson = jr.j2gj()
+    geojson = jr.as_geojson()
     return jsonify({
         "previousQuery": pq,
         "geoJson": geojson
@@ -86,7 +86,7 @@ def download_gpkg():
     as_dict = json.loads(input_geojson)
     jr = Jraph(input_geojson=as_dict)
     return send_file(
-        jr.j2q(),
+        jr.as_gpkg(),
         as_attachment=True,
         download_name="output.gpkg")
 
@@ -97,7 +97,7 @@ def download_kml():
     if input_geojson is None:
         return abort(500, 'could not make file')
     jr = Jraph(input_geojson=json.loads(input_geojson))
-    encoded_kml = jr.j2k().kml().encode()
+    encoded_kml = jr.as_kml().kml().encode()
     fh = io.BytesIO(encoded_kml)
     return send_file(
         fh,
@@ -126,7 +126,7 @@ def index():
     nodes = query_node_prop(search)
     edges = query_many_node_edges([n.node_id for n in nodes])
     jr = Jraph(nodes=nodes, edges=edges)
-    geo_json = jr.j2gj()
+    geo_json = jr.as_gpkg()
 
     return jsonify({
         "previousQuery": search,
