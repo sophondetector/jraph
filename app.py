@@ -126,9 +126,9 @@ def index():
     nodes = query_node_prop(search)
     edges = query_many_node_edges([n.node_id for n in nodes])
     jr = Jraph(nodes=nodes, edges=edges)
-    geo_json = jr.as_gpkg()
+    geojson = jr.as_geojson()
 
     return jsonify({
         "previousQuery": search,
-        "geoJson": geo_json
+        "geoJson": geojson
     })
