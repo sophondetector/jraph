@@ -21,7 +21,16 @@ main>* {
   margin: 5px
 }
 
-#control-panel>form>* {
+#control-panel {
+  display: flex;
+  align-items: flex-start;
+}
+
+#control-panel>* {
+  margin: .5rem
+}
+
+#query-form>* {
   margin-bottom: 1rem;
 }
 
@@ -45,8 +54,4 @@ main>* {
 #download-links {
   display: flex;
   align-items: center
-}
-
-#download-links>button {
-  margin: 1rem;
 }
