@@ -47,11 +47,11 @@ main>* {
 
 #output {
   display: flex;
+  flex-direction: column;
   width: 15rem;
   margin: .5rem;
 }
 
-#download-links {
-  display: flex;
-  align-items: center
+#output>span {
+  font-weight: bold
 }
