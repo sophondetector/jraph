@@ -34,21 +34,21 @@ main>* {
   margin-bottom: 1rem;
 }
 
+#main-section {
+  display: flex;
+  flex-direction: row;
+}
+
 #map {
-  width: 1500px;
+  width: 1200px;
   height: 700px;
   margin: auto
 }
 
-#bottom-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center
-}
-
 #output {
   display: flex;
-  align-items: flex-start;
+  width: 15rem;
+  margin: .5rem;
 }
 
 #download-links {
