@@ -105,12 +105,8 @@ def download_kml():
         download_name="output.kml")
 
 
-# TODO make search its own endpoint
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "GET":
-        return render_template("index.html")
-
+@app.route("/search", methods=["POST"])
+def search():
     search = request.form.get("search")
     if search is None or len(search) == 0:
         return jsonify({
@@ -132,3 +128,8 @@ def index():
         "previousQuery": search,
         "geoJson": geojson
     })
+
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")

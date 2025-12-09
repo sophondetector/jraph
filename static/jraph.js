@@ -170,13 +170,13 @@ document.getElementById('query-form').addEventListener('submit', async function 
 
   const formData = new FormData(this);
 
-  const response = await fetch('/', {
+  const response = await fetch('/search', {
     method: 'POST',
     body: formData
   });
 
   if (!response.ok) {
-    cosnole.warn(`search query failed: ${response.error}`)
+    console.warn(`search query failed: ${response.error}`)
     alert(`query failed`)
     return
   }
