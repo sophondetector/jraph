@@ -18,11 +18,36 @@ class Jraph:
     def __init__(
         self,
         nodes: Optional[List[Node]] = None,
-        edges: Optional[List[Edge]] = None
+        edges: Optional[List[Edge]] = None,
+        input_geojson: Optional[dict] = None
     ):
         self.nodes = nodes if nodes is not None else []
         self.edges = edges if edges is not None else []
         self.name_inc = 0
+
+        if input_geojson is not None:
+            self.add_geojson(input_geojson)
+
+    def add_geojson(self, input_geojson: dict) -> None:
+        """Add nodes and features contained within a geojson"""
+        for feat in input_geojson['features']:
+            if feat['geometry']['type'] == 'LineString':
+                iter_edge = Edge(
+                    edge_id=feat['properties']['edgeId'],
+                    source_id=feat['properties']['sourceId'],
+                    target_id=feat['properties']['targetId'],
+                    properties=feat['properties']
+                )
+                self.add_edge(iter_edge)
+                continue
+
+            iter_node = Node(
+                node_id=feat['id'],
+                long=feat['geometry']['coordinates'][0],
+                lat=feat['geometry']['coordinates'][1],
+                properties=feat['properties']
+            )
+            self.add_node(iter_node)
 
     def j2gj(self) -> geojson.FeatureCollection:
         """
@@ -107,6 +132,7 @@ class Jraph:
             desc = edge.properties.get("description")
             if desc is not None:
                 ls.description = desc
+            # TODO remove get_coords method and use Node.get_coords()
             ls.coords = [self.get_coords(source), self.get_coords(target)]
 
         return kml

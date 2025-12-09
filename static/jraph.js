@@ -83,7 +83,6 @@ function makeFeatureDiv(feature) {
     featureDiv.appendChild(button)
   }
 
-
   return featureDiv
 }
 
@@ -186,4 +185,66 @@ document.getElementById('query-form').addEventListener('submit', async function 
   handleResponse(respJson)
 });
 
+// TODO do file downloads entirely clientside
+document.getElementById('download-kml').addEventListener('click', async function () {
+  if (!currentLayer) {
+    alert('no data to download')
+    return
+  }
+
+  const geojson = currentLayer.toGeoJSON(false)
+  console.log(geojson)
+  const formData = new FormData()
+  formData.append('geojson', JSON.stringify(geojson))
+
+  const resp = await fetch('/download-kml', {
+    method: 'POST',
+    body: formData
+  })
+
+  if (!resp.ok) {
+    alert('server error: could not make file')
+  }
+
+  resp.blob().then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "jraph-data.kml";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  })
+})
+
+document.getElementById('download-gpkg').addEventListener('click', async function () {
+  if (!currentLayer) {
+    alert('no data to download')
+    return
+  }
+
+  const geojson = currentLayer.toGeoJSON(false)
+  console.log(geojson)
+  const formData = new FormData()
+  formData.append('geojson', JSON.stringify(geojson))
+
+  const resp = await fetch('/download-gpkg', {
+    method: 'POST',
+    body: formData
+  })
+
+  if (!resp.ok) {
+    alert('server error: could not make file')
+  }
+
+  resp.blob().then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "jraph-data.gpkg";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  })
+})
 

@@ -52,5 +52,9 @@ class Edge:
         if type(properties) is dict:
             self.properties = properties
 
+        self.properties['edgeId'] = self.edge_id
+        self.properties['targetId'] = self.target_id
+        self.properties['sourceId'] = self.source_id
+
     def __repr__(self):
         return f'<Edge {self.edge_id}: {self.source_id} -> {self.target_id}>'
