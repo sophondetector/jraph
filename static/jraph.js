@@ -97,21 +97,21 @@ function makeFeatureDiv(feature) {
 
 // TODO turn this to typescript and give respJson an interface
 function handleResponse(respJson) {
+  const { geoJson, previousQuery } = respJson
+
   // Append previous query to previous query list
   prevEntry = document.createElement('li')
-  prevEntry.textContent = respJson.previousQuery
+  prevEntry.textContent = previousQuery
   document.getElementById('prev').appendChild(prevEntry)
 
-  const geojson = respJson.geoJson
-
   // Remove previous layer and drawCircle
-  if (currentLayer && geojson.features.length > 0) {
+  if (currentLayer && geoJson.features.length > 0) {
     map.removeLayer(currentLayer);
     if (drawCircle) drawCircle.remove()
   }
 
   // Add new GeoJSON layer
-  currentLayer = L.geoJSON(geojson, {
+  currentLayer = L.geoJSON(geoJson, {
     style: { color: 'blue', weight: 4 },
     onEachFeature: function (feature, layer) {
       const featureDiv = makeFeatureDiv(feature)
@@ -120,7 +120,7 @@ function handleResponse(respJson) {
   }).addTo(map);
 
   // Fit map to bounds
-  if (geojson.features.length > 0) {
+  if (geoJson.features.length > 0) {
     map.fitBounds(currentLayer.getBounds());
   } else {
     alert('No features found for this query.');
