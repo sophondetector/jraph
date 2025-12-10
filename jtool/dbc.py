@@ -2,7 +2,6 @@ import os
 from typing import Optional, List, Tuple
 
 import psycopg
-import pandas as pd
 from dotenv import load_dotenv
 
 from .classes import Node, Edge
@@ -15,18 +14,6 @@ _DB_USER_VAR = "DB_USER"
 _DB_PASSWORD_VAR = "DB_PASSWORD"
 _DB_NAME = "offshore_leaks"
 _TIMEOUT = 10
-
-
-def _nan2none(d: dict) -> dict:
-    """
-    recurses through dict changing NaN to None
-    """
-    for k in d.keys():
-        if pd.isna(d[k]):
-            d[k] = None
-        if type(d[k]) is dict:
-            d[k] = _nan2none(d[k])
-    return d
 
 
 def check_for_sql_injection(search_str: str) -> bool:
