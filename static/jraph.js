@@ -23,7 +23,21 @@ const control = L.Control.fileLayerLoad({
 control.loader.on('data:error', function (error) {
   console.log('ERROR', error);
 });
-let currentLayer = null; // To remove previous results
+
+let currentLayer = null;
+let drawCircle = null;
+
+function downloadFromResp(resp, filename) {
+  resp.blob().then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  })
+}
 
 // TODO write makeNodeFeatureDiv and makeEdgeFeatureDiv
 function makeFeatureDiv(feature) {
@@ -118,7 +132,6 @@ function handleResponse(respJson) {
   }
 }
 
-let drawCircle = null;
 map.on('mousedown', async e => {
   if (!e.originalEvent.altKey) return;
 
@@ -145,18 +158,17 @@ map.on('mousedown', async e => {
     formData.append("lng", center.lng)
     formData.append("rad", radius)
 
-    const response = await fetch('/nodes-within-radius', {
+    const resp = await fetch('/nodes-within-radius', {
       method: 'POST',
       body: formData
     })
 
-    if (!response.ok) {
-      console.warn(`something went wrong: ${response.error}`)
+    if (!resp.ok) {
       alert('something went wrong with your request, please try again')
       return
     }
 
-    const respJson = await response.json()
+    const respJson = await resp.json()
     handleResponse(respJson)
   };
 
@@ -170,81 +182,51 @@ document.getElementById('query-form').addEventListener('submit', async function 
 
   const formData = new FormData(this);
 
-  const response = await fetch('/search', {
+  const resp = await fetch('/search', {
     method: 'POST',
     body: formData
   });
 
-  if (!response.ok) {
-    console.warn(`search query failed: ${response.error}`)
+  if (!resp.ok) {
+    console.warn(`search query failed: ${resp.error}`)
     alert(`query failed`)
     return
   }
 
-  respJson = await response.json()
+  respJson = await resp.json()
   handleResponse(respJson)
 });
 
 // TODO do file downloads entirely clientside
-document.getElementById('download-kml').addEventListener('click', async function () {
+document.getElementById('download-kml').addEventListener('click', function () {
   if (!currentLayer) {
     alert('no data to download')
     return
   }
 
   const geojson = currentLayer.toGeoJSON(false)
-  console.log(geojson)
   const formData = new FormData()
   formData.append('geojson', JSON.stringify(geojson))
 
-  const resp = await fetch('/download-kml', {
+  fetch('/download-kml', {
     method: 'POST',
     body: formData
-  })
-
-  if (!resp.ok) {
-    alert('server error: could not make file')
-  }
-
-  resp.blob().then(blob => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "jraph-data.kml";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  })
+  }).then(resp => downloadFromResp(resp, 'jraph-data.kml'))
 })
 
-document.getElementById('download-gpkg').addEventListener('click', async function () {
+document.getElementById('download-gpkg').addEventListener('click', function () {
   if (!currentLayer) {
     alert('no data to download')
     return
   }
 
   const geojson = currentLayer.toGeoJSON(false)
-  console.log(geojson)
   const formData = new FormData()
   formData.append('geojson', JSON.stringify(geojson))
 
-  const resp = await fetch('/download-gpkg', {
+  fetch('/download-gpkg', {
     method: 'POST',
     body: formData
-  })
-
-  if (!resp.ok) {
-    alert('server error: could not make file')
-  }
-
-  resp.blob().then(blob => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "jraph-data.gpkg";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  })
+  }).then(resp => downloadFromResp(resp, 'jraph-data.gpkg'))
 })
 
