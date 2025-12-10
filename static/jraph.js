@@ -77,21 +77,12 @@ function makeFeatureDiv(feature) {
     const formData = new FormData()
     formData.append("nodeId", feature.id)
 
-    button.addEventListener('click', async () => {
-      const resp = await fetch('/related-nodes', {
+    button.addEventListener('click', () => {
+      fetch('/related-nodes', {
         method: 'POST',
         body: formData
-      })
-
-      if (!resp.ok) {
-        console.log('SERVER ERROR')
-        const body = await resp.body()
-        console.log(body)
-        return
-      }
-
-      const json = await resp.json()
-      handleResponse(json)
+      }).then(resp => resp.json())
+        .then(handleResponse)
     })
 
     featureDiv.appendChild(button)
@@ -158,18 +149,11 @@ map.on('mousedown', async e => {
     formData.append("lng", center.lng)
     formData.append("rad", radius)
 
-    const resp = await fetch('/nodes-within-radius', {
+    fetch('/nodes-within-radius', {
       method: 'POST',
       body: formData
-    })
-
-    if (!resp.ok) {
-      alert('something went wrong with your request, please try again')
-      return
-    }
-
-    const respJson = await resp.json()
-    handleResponse(respJson)
+    }).then(resp => resp.json())
+      .then(handleResponse)
   };
 
   map.on('mousemove', moveHandler);
@@ -177,24 +161,16 @@ map.on('mousedown', async e => {
 });
 
 
-document.getElementById('query-form').addEventListener('submit', async function (e) {
+document.getElementById('query-form').addEventListener('submit', function (e) {
   e.preventDefault(); // Prevent full page reload
 
   const formData = new FormData(this);
 
-  const resp = await fetch('/search', {
+  fetch('/search', {
     method: 'POST',
     body: formData
-  });
-
-  if (!resp.ok) {
-    console.warn(`search query failed: ${resp.error}`)
-    alert(`query failed`)
-    return
-  }
-
-  respJson = await resp.json()
-  handleResponse(respJson)
+  }).then(resp => resp.json())
+    .then(handleResponse)
 });
 
 // TODO do file downloads entirely clientside
