@@ -80,7 +80,7 @@ def nodes_within_radius():
 
 @app.route("/download-gpkg", methods=["POST"])
 def download_gpkg():
-    input_geojson = request.form.get("geojson")
+    input_geojson = request.form.get("geoJson")
     if input_geojson is None:
         return abort(500, 'could not make file')
     as_dict = json.loads(input_geojson)
@@ -93,7 +93,7 @@ def download_gpkg():
 
 @app.route("/download-kml", methods=["POST"])
 def download_kml():
-    input_geojson = request.form.get("geojson")
+    input_geojson = request.form.get("geoJson")
     if input_geojson is None:
         return abort(500, 'could not make file')
     jr = Jraph(input_geojson=json.loads(input_geojson))

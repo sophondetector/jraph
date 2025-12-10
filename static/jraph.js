@@ -184,9 +184,9 @@ document.getElementById('download-kml').addEventListener('click', function () {
     return
   }
 
-  const geojson = currentLayer.toGeoJSON(false)
+  const geoJson = currentLayer.toGeoJSON(false)
   const formData = new FormData()
-  formData.append('geojson', JSON.stringify(geojson))
+  formData.append('geoJson', JSON.stringify(geoJson))
 
   fetch('/download-kml', {
     method: 'POST',
@@ -200,9 +200,9 @@ document.getElementById('download-gpkg').addEventListener('click', function () {
     return
   }
 
-  const geojson = currentLayer.toGeoJSON(false)
+  const geoJson = currentLayer.toGeoJSON(false)
   const formData = new FormData()
-  formData.append('geojson', JSON.stringify(geojson))
+  formData.append('geoJson', JSON.stringify(geoJson))
 
   fetch('/download-gpkg', {
     method: 'POST',
