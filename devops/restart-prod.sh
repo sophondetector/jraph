@@ -7,5 +7,5 @@ fi
 
 printf "restarting jraph-app.service..."
 systemctl restart jraph-app.service
-printf "done"
+printf "done\n"
 systemctl status jraph-app.service
