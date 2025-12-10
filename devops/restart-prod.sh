@@ -5,5 +5,7 @@ if [[ $USER != "root" ]]; then
   exit 1
 fi
 
+printf "restarting jraph-app.service..."
 systemctl restart jraph-app.service
+printf "done"
 systemctl status jraph-app.service
