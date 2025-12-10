@@ -209,9 +209,11 @@ def query_node_prop(value: str) -> List[Node]:
         geocoded_address->'features'->0->'properties'->'geocoding'->>'name' as name,
         geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
     FROM nodes_nom_addresses
-    WHERE geocoded_address->'features'->0->'properties'->>'geocoding'
+    WHERE geocoded_address->'features'->0->'properties'->'geocoding'->>'label'
+    ILIKE '%{}%'
+    OR geocoded_address->'features'->0->'properties'->'geocoding'->>'name'
     ILIKE '%{}%';
-    """.format(value)
+    """.format(value, value)
     with get_cur() as cur:
         cur.execute(sql)
         return [_row2node(r) for r in cur.fetchall()]
