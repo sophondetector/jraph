@@ -1,6 +1,5 @@
 import os
-import json
-from typing import Optional, Union, List, Tuple
+from typing import Optional, List, Tuple
 
 import psycopg
 import pandas as pd
