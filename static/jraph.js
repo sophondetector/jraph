@@ -39,56 +39,60 @@ function downloadFromResp(resp, filename) {
   })
 }
 
-// TODO write makeNodeFeatureDiv and makeEdgeFeatureDiv
-function makeFeatureDiv(feature) {
+function makeNodeFeatureDiv(feature) {
   const featureDiv = document.createElement('div')
 
-  if (feature.id) {
-    const idPara = document.createElement('p')
-    idPara.textContent = `Node Id: ${feature.id}`
-    featureDiv.appendChild(idPara)
+  const idPara = document.createElement('p')
+  idPara.textContent = `Node Id: ${feature.id}`
+  featureDiv.appendChild(idPara)
+
+  for (const [k, v] of Object.entries(feature.properties)) {
+    if (!v) continue
+    const para = document.createElement('p')
+    para.textContent = `${k}: ${v}`
+    featureDiv.appendChild(para)
   }
 
-  if (feature.properties && feature.properties.name) {
-    const namePara = document.createElement('p')
-    namePara.textContent = feature.properties.name
-    featureDiv.appendChild(namePara)
-  }
+  const button = document.createElement('button')
+  button.textContent = "Get Related Nodes"
 
-  if (feature.properties && feature.properties.description) {
-    const descPara = document.createElement('p')
-    descPara.textContent = feature.properties.description
-    featureDiv.appendChild(descPara)
-  }
+  const formData = new FormData()
+  formData.append("nodeId", feature.id)
 
-  if (feature.properties && feature.properties.label) {
-    const labPara = document.createElement('p')
-    labPara.textContent = feature.properties.label
-    featureDiv.appendChild(labPara)
-  }
+  button.addEventListener('click', () => {
+    fetch('/related-nodes', {
+      method: 'POST',
+      body: formData
+    }).then(resp => resp.json())
+      .then(handleResponse)
+  })
 
-  // There being a feature.id means its a Node feature
-  // We only want to add the get related nodes button 
-  // if its a Node feature
-  if (feature.id) {
-    const button = document.createElement('button')
-    button.textContent = "Get Related Nodes"
+  featureDiv.appendChild(button)
 
-    const formData = new FormData()
-    formData.append("nodeId", feature.id)
+  return featureDiv
+}
 
-    button.addEventListener('click', () => {
-      fetch('/related-nodes', {
-        method: 'POST',
-        body: formData
-      }).then(resp => resp.json())
-        .then(handleResponse)
-    })
+function makeEdgeFeatureDiv(feature) {
+  const featureDiv = document.createElement('div')
 
-    featureDiv.appendChild(button)
+  const { sourceId, targetId } = feature.properties
+  const edgeHeaderPara = document.createElement('p')
+  edgeHeaderPara.textContent = `${sourceId} -> ${targetId}`
+  featureDiv.appendChild(edgeHeaderPara)
+
+  for (const [k, v] of Object.entries(feature.properties)) {
+    if (k === 'sourceId' || k === 'targetId') continue
+    const para = document.createElement('p')
+    para.textContent = `${k}: ${v}`
+    featureDiv.appendChild(para)
   }
 
   return featureDiv
+}
+
+function makeFeatureDiv(feature) {
+  if (feature.id !== undefined) return makeNodeFeatureDiv(feature)
+  return makeEdgeFeatureDiv(feature)
 }
 
 // TODO turn this to typescript and give respJson an interface
