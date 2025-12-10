@@ -210,7 +210,7 @@ def query_node_prop(value: str) -> List[Node]:
         geocoded_address->'features'->0->'properties'->'geocoding'->>'label' as label
     FROM nodes_nom_addresses
     WHERE geocoded_address->'features'->0->'properties'->>'geocoding'
-    LIKE '%{}%';
+    ILIKE '%{}%';
     """.format(value)
     with get_cur() as cur:
         cur.execute(sql)
